@@ -4,9 +4,9 @@
    COLOUR and TYPE: #FFF1EB cream, #7360F9 violet, #BC9BF3 lilac, #B9D440 lime; Poppins 400/600/700.
    LAYOUT: floating pill menu on top (bottom on phones), cards in a grid below. */
 :root{color-scheme:light dark;
---bg:light-dark(#fff1eb,#14112a);--card:light-dark(#ffffff,#1e1a3a);--ink:light-dark(#241f4f,#f3efff);--mute:light-dark(#7b7698,#a9a3cc);
+--bg:light-dark(#fff1eb,#14112a);--card:light-dark(#ffffff,#1e1a3a);--ink:light-dark(#241f4f,#f3efff);--mute:light-dark(#6e6990,#a9a3cc);
 --line:light-dark(#f0e4dd,#2f2a52);--soft:light-dark(#fbf6f3,#252046);
---violet:#7360f9;--violet2:light-dark(#7360f9,#9d8dff);--lilac:#bc9bf3;--lime:#b9d440;--cream:#fff1eb;--deep:#241f4f}
+--violet:#7360f9;--violet2:light-dark(#6650ee,#9d8dff);--vbtn:#6650ee;--lilac:#bc9bf3;--lime:#b9d440;--cream:#fff1eb;--deep:#241f4f}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.55 Poppins,system-ui,sans-serif;overflow-x:clip}
@@ -54,10 +54,10 @@ section[hidden]{display:none}
 .stat b{display:block;font-size:40px;font-weight:700;margin-top:12px;line-height:1}
 .stat::after{content:"";position:absolute;right:-22px;bottom:-22px;width:80px;height:80px;border:10px solid currentColor;border-radius:50%;opacity:.12}
 .p1{background:var(--lime);color:var(--deep)}.p2{background:var(--lilac);color:var(--deep)}.p3{background:var(--deep);color:#fff}.p4{background:var(--card);color:var(--violet2)}
-button,.btn{font:600 15px Poppins,sans-serif;border:0;border-radius:999px;padding:10px 20px;min-height:44px;background:var(--violet);color:#fff;cursor:pointer}
+button,.btn{font:600 15px Poppins,sans-serif;border:0;border-radius:999px;padding:10px 20px;min-height:44px;background:var(--vbtn);color:#fff;cursor:pointer}
 button.ghost{background:var(--soft);color:var(--ink)}
 button.ghost:hover{background:var(--line)}
-button.pick{background:var(--violet);color:#fff}
+button.pick{background:var(--vbtn);color:#fff}
 button:disabled{opacity:.6}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,nav a:focus-visible,.list li:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
 input,select,textarea{font:15.5px Poppins,sans-serif;color:var(--ink);background:var(--soft);border:1.5px solid transparent;border-radius:16px;padding:10px 14px;min-height:44px;width:100%}
@@ -68,7 +68,7 @@ label{display:block;font-size:13.5px;font-weight:500;margin:12px 0 4px;color:var
 .list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .list li{padding:14px 18px;border-radius:22px;background:var(--soft);cursor:pointer;border:2px solid transparent}
 #jlist li{background:var(--card)}
-#jlist li:nth-child(3n+1){border-left:8px solid var(--lime)}#jlist li:nth-child(3n+2){border-left:8px solid var(--lilac)}#jlist li:nth-child(3n){border-left:8px solid var(--violet)}
+#jlist li{position:relative;padding-left:44px}#jlist li::before{content:"";position:absolute;left:16px;top:20px;width:14px;height:14px;border-radius:50%;background:var(--lime)}#jlist li:nth-child(3n+2)::before{background:var(--lilac)}#jlist li:nth-child(3n)::before{background:var(--violet)}
 .list li.on{border-color:var(--violet2);background:var(--card)}
 .tag{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 12px;border-radius:999px}
 .tag.c{background:color-mix(in srgb,var(--lilac) 35%,transparent);color:var(--violet2)}

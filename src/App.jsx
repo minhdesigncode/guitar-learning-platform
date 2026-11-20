@@ -4,21 +4,22 @@ import Journal from './components/Journal.jsx'
 import ChordSpace from './components/ChordSpace.jsx'
 import Theory from './components/Theory.jsx'
 import Tools from './components/Tools.jsx'
-import { useStored } from './lib/store.js'
+import Home from './components/Home.jsx'
+import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS } from './lib/seed.js'
 
 const VIEWS = {
-  journal: 'Guitar journal',
+  journal: 'Trang chủ',
   chords: 'Chord space',
   theory: 'Nhạc lý',
-  tools: 'Beat & kết nối',
+  tools: 'Beat này beat kia',
 }
 
 const SUB = {
-  journal: 'Lưu lại mọi bản cover và sáng tác, nghe lại mình đã tiến bộ tới đâu.',
+  journal: 'Nhạc lý tuần này, bài mới nhất và mọi bản thu, nghe lại mình đã tiến bộ tới đâu.',
   chords: 'Hợp âm bạn tự mò ra, đổi tông chỉ với một chạm.',
   theory: 'Âm giai, ngũ cung, hợp âm theo key, dò key từ tai nghe.',
-  tools: 'Máy nhịp, beat trống và các công cụ sáng tác yêu thích.',
+  tools: 'Máy nhịp và beat trống để tập cùng.',
 }
 
 function Waves() {
@@ -50,6 +51,7 @@ export default function App() {
   const [songs, setSongs] = useStored('sodan.songs', SEED_SONGS)
   const [journal, setJournal] = useStored('sodan.journal', [])
   const [draft, setDraft] = useState(null)
+  const [openId, setOpenId] = useState(null)
 
   useEffect(() => {
     const onHash = () => setView(currentView())
@@ -66,6 +68,26 @@ export default function App() {
 
   const newSongFromProgression = (song) => {
     setDraft(song)
+    window.location.hash = 'chords'
+  }
+
+  useEffect(() => {
+    if (view !== 'chords') setOpenId(null)
+  }, [view])
+
+  const addRecording = async (song, { file, kind }) => {
+    const entry = { id: uid(), songId: song.id, title: song.title, kind, note: 'Key ' + song.key, date: Date.now() }
+    try {
+      await saveMedia(entry.id, file)
+      entry.mediaType = file.type || 'audio/webm'
+    } catch {
+      entry.note += ' · không lưu được file, bộ nhớ trình duyệt có thể đã đầy'
+    }
+    setJournal((j) => [entry, ...j])
+  }
+
+  const openSong = (id) => {
+    setOpenId(id)
     window.location.hash = 'chords'
   }
 
@@ -88,11 +110,17 @@ export default function App() {
                   </div>
                 ))}
               </div>
+              <Home
+                songs={songs}
+                journal={journal}
+                onOpenSong={openSong}
+                onNewSong={() => newSongFromProgression({ title: '', key: 'C', capo: 0, body: '# Verse 1\n[C]' })}
+              />
               <Journal journal={journal} setJournal={setJournal} />
             </>
           )}
           {view === 'chords' && (
-            <ChordSpace songs={songs} setSongs={setSongs} draft={draft} clearDraft={() => setDraft(null)} />
+            <ChordSpace openId={openId} journal={journal} onAddRecording={addRecording} songs={songs} setSongs={setSongs} draft={draft} clearDraft={() => setDraft(null)} />
           )}
           {view === 'theory' && <Theory onCreateSong={newSongFromProgression} />}
           {view === 'tools' && <Tools />}

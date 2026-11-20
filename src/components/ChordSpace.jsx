@@ -1,6 +1,7 @@
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { transposeBody, transposeKey } from '../lib/music.js'
 import { uid } from '../lib/store.js'
+import { Media, Recorder } from './Journal.jsx'
 
 // Split the body into sections (a # heading starts a new one) so columns never cut a heading off its lines.
 function sections(body) {
@@ -118,6 +119,12 @@ function fitSheet(el, bar) {
 
 function Editor({ song, onSave, onCancel }) {
   const [f, setF] = useState(song)
+  const [file, setFile] = useState(null)
+  const [kind, setKind] = useState('s')
+  const [recMsg, setRecMsg] = useState('')
+  const fileInput = useRef(null)
+  const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
+  useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview])
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   return (
     <div className="card">
@@ -139,11 +146,35 @@ function Editor({ song, onSave, onCancel }) {
         Đặt hợp âm trong ngoặc vuông ngay trước chữ: <code>[G]Met you on a [Bm]road</code>. Dòng bắt đầu bằng <code>#</code> là tên đoạn.
       </p>
       <textarea id="eb" value={f.body} onChange={set('body')} />
+      <div className="rec-box">
+        <h3>Bản thu <span className="muted" style={{ fontWeight: 400, fontSize: 14 }}>(không bắt buộc)</span></h3>
+        <p className="muted" style={{ margin: '2px 0 0' }}>Đính kèm file hoặc thu âm ngay. Bản thu sẽ hiện ở trang chủ và dưới bài này.</p>
+        <div className="row" style={{ marginTop: 6 }}>
+          <div style={{ flex: '1 1 140px' }}>
+            <label htmlFor="rk">Loại</label>
+            <select id="rk" value={kind} onChange={(e) => setKind(e.target.value)}>
+              <option value="s">Sáng tác</option>
+              <option value="c">Cover</option>
+            </select>
+          </div>
+          <div style={{ flex: '2 1 220px' }}>
+            <label htmlFor="rf">File ghi âm hoặc video</label>
+            <input id="rf" ref={fileInput} type="file" accept="audio/*,video/*" onChange={(e) => { setFile(e.target.files[0] || null); setRecMsg('') }} />
+          </div>
+        </div>
+        <Recorder onDone={(blob) => { setFile(blob); if (fileInput.current) fileInput.current.value = ''; setRecMsg('Đã thu xong, bấm “Lưu bài” để giữ lại.') }} />
+        {preview && (String(file.type).startsWith('video') ? <video controls src={preview} /> : <audio controls src={preview} />)}
+        {file && <button className="ghost" style={{ marginTop: 8, minHeight: 36, padding: '6px 14px' }} onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; setRecMsg('') }}>Bỏ bản thu</button>}
+        {recMsg && <p className="note">{recMsg}</p>}
+      </div>
       <div className="row" style={{ marginTop: 12 }}>
         <button
           className="pick"
           onClick={() =>
-            onSave({ ...f, title: f.title.trim() || 'Bài chưa đặt tên', key: f.key.trim() || 'C', capo: +f.capo || 0 })
+            onSave(
+              { ...f, title: f.title.trim() || 'Bài chưa đặt tên', key: f.key.trim() || 'C', capo: +f.capo || 0 },
+              file && { file, kind },
+            )
           }
         >
           Lưu bài
@@ -154,9 +185,9 @@ function Editor({ song, onSave, onCancel }) {
   )
 }
 
-export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
+export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId, journal = [], onAddRecording }) {
   const sorted = [...songs].sort((a, b) => b.updated - a.updated)
-  const [curId, setCurId] = useState(sorted[0]?.id || null)
+  const [curId, setCurId] = useState((songs.some((s) => s.id === openId) && openId) || sorted[0]?.id || null)
   const [editing, setEditing] = useState(null)
   const [offset, setOffset] = useState(0)
   const [q, setQ] = useState('')
@@ -173,6 +204,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
   }, [draft, clearDraft])
 
   const cur = songs.find((s) => s.id === curId)
+  const recs = cur ? journal.filter((j) => j.songId === cur.id) : []
   const select = (id) => {
     setCurId(id)
     setOffset(0)
@@ -180,8 +212,9 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
     setSure(false)
   }
 
-  const save = (song) => {
+  const save = (song, rec) => {
     const s = { ...song, id: song.id || uid(), updated: Date.now() }
+    if (rec && onAddRecording) onAddRecording(s, rec)
     setSongs(songs.some((x) => x.id === s.id) ? songs.map((x) => (x.id === s.id ? s : x)) : [s, ...songs])
     setCurId(s.id)
     setEditing(null)
@@ -297,6 +330,17 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
               </button>
             </div>
             <Sheet ref={sheetRef} body={body} zoom={v.zoom} cols={v.cols} />
+            {recs.length > 0 && (
+              <div className="rec-box">
+                <h3>Bản thu của bài này</h3>
+                {recs.map((r) => (
+                  <div key={r.id} style={{ marginTop: 10 }}>
+                    <span className="muted">{new Date(r.date).toLocaleDateString('vi-VN')} · {r.kind === 'c' ? 'Cover' : 'Sáng tác'}</span>
+                    {r.mediaType && <Media id={r.id} type={r.mediaType} />}
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="row" style={{ marginTop: 16 }}>
               <button className="ghost" onClick={() => {
                 if (!sure) return setSure(true)

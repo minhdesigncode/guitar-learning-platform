@@ -1,0 +1,81 @@
+/* Home widgets */
+.home{display:grid;gap:22px;margin-bottom:28px}
+.home-side{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch}
+@media(max-width:1000px){.home-side{grid-template-columns:repeat(2,minmax(0,1fr))}.home-side>.w-songs{grid-column:1/-1}}
+@media(max-width:640px){.home-side{grid-template-columns:minmax(0,1fr)}}
+.w-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.w-kicker{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 12px;border-radius:999px;background:color-mix(in srgb,var(--lime) 45%,transparent);color:light-dark(#4d5a12,#d5ec6e);margin-bottom:8px}
+.w-sm{min-height:38px;padding:6px 14px;font-size:14px;white-space:nowrap}
+.w-link{color:var(--violet2);font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;padding-top:4px}
+.w-link:hover{text-decoration:underline}
+.w-nav{display:flex;align-items:center;gap:6px;flex:none}
+.w-nav button{width:40px;min-height:40px;padding:0;font-size:22px;line-height:1}
+
+/* recent songs */
+.w-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.w-row{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;border-radius:20px;background:var(--soft);cursor:pointer}
+.w-row:hover{background:var(--line)}
+.w-row:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.w-key{flex:none;width:42px;height:42px;border-radius:14px;background:var(--violet);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px}
+.w-list li:nth-child(3n+2) .w-key{background:var(--lilac);color:var(--deep)}
+.w-list li:nth-child(3n) .w-key{background:var(--lime);color:var(--deep)}
+.w-main{flex:1;display:grid}
+.w-main b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-chords{font-size:13.5px;font-weight:600;color:var(--violet2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-when{flex:none;font-size:12.5px}
+@media(max-width:420px){.w-when{display:none}}
+
+/* metronome */
+.w-bpm{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px}
+.w-bpm div{text-align:center}
+.w-bpm b{display:block;font-size:44px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.w-bpm small{color:var(--mute);font-size:13px}
+.w-round{width:44px;padding:0;font-size:22px}
+.w-beats{display:flex;gap:8px;justify-content:center;margin:12px 0 14px}
+.w-beats span{width:16px;height:16px;border-radius:50%;background:var(--soft);transition:transform .08s}
+.w-beats span:first-child{width:20px;height:20px;margin-top:-2px}
+.w-beats span.now{background:var(--lime);transform:scale(1.15)}
+.w-beats span:first-child.now{background:var(--violet)}
+
+/* practice */
+.w-streak{flex:none;font-weight:700;font-size:14px;background:var(--soft);border-radius:999px;padding:6px 12px}
+.w-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:14px}
+.w-day{display:grid;justify-items:center;gap:4px}
+.w-day span{width:100%;aspect-ratio:1;max-width:40px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--deep)}
+.w-day.on span{background:var(--lilac)}
+.w-day.more span{background:var(--violet);color:#fff}
+.w-day small{font-size:12px;color:var(--mute)}
+
+/* theory of the week: circle of fifths */
+.cof-wrap{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:center;margin-top:16px}
+@media(max-width:760px){.cof-wrap{grid-template-columns:minmax(0,1fr)}.cof{max-width:380px;margin:auto}}
+.cof{width:100%;height:auto;display:block;font-family:Poppins,sans-serif;user-select:none}
+.cof g{cursor:pointer;outline:none}
+.cof path{fill:var(--card);stroke:var(--ink);stroke-opacity:.18;stroke-width:1.5;transition:fill .15s}
+.cof .i path{fill:var(--soft)}
+.cof g:hover path{fill:var(--line)}
+.cof g:focus-visible path{stroke:var(--lime);stroke-width:4;stroke-opacity:1}
+.cof text{fill:var(--ink);pointer-events:none}
+.cof .o .t1{font-size:21px;font-weight:600}
+.cof .i .t1{font-size:13px;font-weight:600}
+.cof .t2{font-size:11px;opacity:.6}
+.cof .o.on path{fill:var(--violet)}
+.cof .o.on text{fill:#fff}
+.cof .i.on path{fill:var(--lilac)}
+.cof .i.on text{fill:var(--deep)}
+.cof g.tonic path,.cof g.tonic.on path{fill:var(--lime)}
+.cof g.tonic text,.cof g.tonic.on text{fill:var(--deep)}
+.cof .hub{fill:var(--violet)}
+.cof .hub-k{fill:#fff;font-size:26px;font-weight:700}
+.cof .hub-s{fill:#e7e1ff;font-size:12px}
+.cof-info h3{font-size:22px}
+.cof-info p{margin:10px 0 0;max-width:62ch}
+.cof-notes{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cof-notes span{min-width:48px;padding:8px 12px;border-radius:16px;background:var(--soft);text-align:center;font-weight:700;font-size:17px}
+.cof-notes span.root{background:var(--violet);color:#fff}
+.cof-notes small{display:block;font-size:11.5px;font-weight:500;opacity:.75}
+
+/* recording box in the Chord space editor and viewer */
+.rec-box{margin-top:18px;padding:16px 18px;border-radius:22px;background:var(--soft)}
+.rec-box h3{font-size:16px}
+.rec-box input,.rec-box select{background:var(--card)}

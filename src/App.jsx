@@ -10,6 +10,9 @@ import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS } from './lib/seed.js'
 import { useT } from './i18n/index.jsx'
+import Account from './components/Account.jsx'
+import { useAuth } from './cloud/auth.jsx'
+import { useCloudSync } from './cloud/useCloudSync.js'
 
 // Title and subtitle of each view come from the i18n dictionaries (nav.<id>, sub.<id>).
 const VIEWS = ['journal', 'chords', 'theory', 'tools', 'creative']
@@ -46,6 +49,8 @@ export default function App() {
   const [journal, setJournal] = useStored('sodan.journal', [])
   const [draft, setDraft] = useState(null)
   const [openId, setOpenId] = useState(null)
+  const { user } = useAuth()
+  const sync = useCloudSync(user, songs, setSongs, journal, setJournal)
 
   useEffect(() => {
     // Tab changes run inside a view transition where the browser has one:
@@ -95,7 +100,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNav view={view} />
+      <TopNav view={view} account={<Account sync={user ? sync : null} />} />
       <div className="hero">
         <Waves key={view} />
         <h1>{t('nav.' + view)}</h1>

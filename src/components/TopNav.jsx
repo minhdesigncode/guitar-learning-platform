@@ -55,7 +55,7 @@ const ITEMS = [
 ]
 
 // Floating pill menu across the top (moves to the bottom of the screen on phones).
-export default function TopNav({ view }) {
+export default function TopNav({ view, account }) {
   const { t, lang, setLang } = useI18n()
   const other = lang === 'vi' ? 'en' : 'vi'
   return (
@@ -85,7 +85,7 @@ export default function TopNav({ view }) {
         <button type="button" className="lang" onClick={() => setLang(other)} title={t('lang.switch')} aria-label={t('lang.switch')}>
           {t('lang.short')}
         </button>
-        <span className="dot" aria-hidden="true">M</span>
+        {account ?? <span className="dot" aria-hidden="true">M</span>}
       </div>
     </header>
   )

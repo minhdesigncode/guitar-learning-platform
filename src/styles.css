@@ -128,3 +128,20 @@ audio,video{width:100%;margin-top:10px;border-radius:14px}
 .creative-now .muted{color:#4d5a12}
 .creative-credit{margin:18px 0 0;font-size:13px}
 .creative-credit a{color:var(--violet2)}
+
+/* account (Google sign-in + sync menu) */
+.signin{display:flex;align-items:center;gap:8px;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;min-height:40px;font-weight:600;flex:none}
+.signin:hover{background:var(--soft)}
+.account{position:relative;flex:none}
+button.dot.avatar{padding:0;border:0;cursor:pointer;overflow:visible;position:relative;min-height:0}
+.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.sync-ring{position:absolute;inset:-4px;border-radius:50%;border:2.5px solid transparent;border-top-color:var(--violet);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sync-ring{animation:none;border-color:var(--violet)}}
+.account-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:30;min-width:240px;background:var(--card);color:var(--ink);border-radius:22px;padding:16px;box-shadow:0 18px 44px -14px rgba(36,31,79,.4);display:grid;gap:4px}
+.account-menu small{color:var(--mute)}
+.account-menu .sync-state{margin:6px 0 8px;font-size:13.5px;color:var(--mute)}
+.account-menu .sync-state.error{color:#c2410c}
+.account-menu .row{gap:8px}
+.account-menu button{min-height:36px;padding:6px 14px}
+@media(max-width:640px){.signin span{display:none}.signin{padding:8px 10px}}

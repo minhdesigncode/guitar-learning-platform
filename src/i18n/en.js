@@ -225,4 +225,18 @@ export default {
   'cr.soundHint': 'Browsers only play sound after a click: press “Turn on sound” or tap the guitar once.',
   'cr.creditA': 'Drawn in the style and with the engine of',
   'cr.creditB': '(Lucas Marques, MIT).',
+
+  // Tài khoản + đồng bộ cloud
+  'auth.signIn': 'Sign in',
+  'auth.signInGoogle': 'Sign in with Google',
+  'auth.signOut': 'Sign out',
+  'auth.why': 'Sign in to save songs and recordings to the cloud and open them on any device.',
+  'auth.notConfigured': 'Cloud is off: Supabase is not configured.',
+  'auth.menu': 'Account',
+  'sync.syncing': 'Syncing…',
+  'sync.ok': 'Synced {time}',
+  'sync.error': 'Sync failed, will retry',
+  'sync.offline': 'Offline, data is still saved on this device',
+  'sync.now': 'Sync now',
+  'auth.required': 'Sign in to use this feature.',
 }

@@ -233,4 +233,18 @@ export default {
   'cr.soundHint': 'Trình duyệt chỉ cho phát tiếng sau một cú bấm: bấm “Bật tiếng đàn” hoặc chạm vào cây đàn một lần.',
   'cr.creditA': 'Vẽ theo phong cách và engine của',
   'cr.creditB': '(Lucas Marques, MIT).',
+
+  // Tài khoản + đồng bộ cloud
+  'auth.signIn': 'Đăng nhập',
+  'auth.signInGoogle': 'Đăng nhập bằng Google',
+  'auth.signOut': 'Đăng xuất',
+  'auth.why': 'Đăng nhập để lưu bài hát và bản thu lên cloud, mở trên máy nào cũng thấy.',
+  'auth.notConfigured': 'Chưa bật cloud: thiếu cấu hình Supabase.',
+  'auth.menu': 'Tài khoản',
+  'sync.syncing': 'Đang đồng bộ…',
+  'sync.ok': 'Đã đồng bộ {time}',
+  'sync.error': 'Đồng bộ lỗi, sẽ thử lại',
+  'sync.offline': 'Đang offline, dữ liệu vẫn lưu trên máy',
+  'sync.now': 'Đồng bộ ngay',
+  'auth.required': 'Cần đăng nhập để dùng chức năng này.',
 }

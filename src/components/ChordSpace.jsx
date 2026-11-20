@@ -154,9 +154,9 @@ function Editor({ song, onSave, onCancel }) {
   )
 }
 
-export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
+export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId }) {
   const sorted = [...songs].sort((a, b) => b.updated - a.updated)
-  const [curId, setCurId] = useState(sorted[0]?.id || null)
+  const [curId, setCurId] = useState((songs.some((s) => s.id === openId) && openId) || sorted[0]?.id || null)
   const [editing, setEditing] = useState(null)
   const [offset, setOffset] = useState(0)
   const [q, setQ] = useState('')

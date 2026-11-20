@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase, cloudEnabled } from './client.js'
-import { ta } from './strings.js'
+import { useT } from '../i18n/index.jsx'
 
 const Ctx = createContext({ enabled: false, user: null, ready: true })
 
@@ -46,12 +46,13 @@ export const useAuth = () => useContext(Ctx)
 // Wrap anything that needs an account: shows the sign-in prompt instead when signed out.
 export function RequireAuth({ children, fallback }) {
   const { user, enabled, signIn } = useAuth()
+  const t = useT()
   if (user) return children
   if (fallback !== undefined) return fallback
   return enabled ? (
     <div>
-      <p className="note">{ta('auth.required')}</p>
-      <button type="button" onClick={signIn}>{ta('auth.signInGoogle')}</button>
+      <p className="note">{t('auth.required')}</p>
+      <button type="button" onClick={signIn}>{t('auth.signInGoogle')}</button>
     </div>
   ) : null
 }

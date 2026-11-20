@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../cloud/auth.jsx'
-import { ta } from '../cloud/strings.js'
+import { useI18n } from '../i18n/index.jsx'
 
 const G = (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -11,17 +11,18 @@ const G = (
   </svg>
 )
 
-function statusText(status) {
-  if (status.state === 'syncing') return ta('sync.syncing')
-  if (status.state === 'error') return ta('sync.error')
-  if (status.state === 'offline') return ta('sync.offline')
-  if (status.at) return ta('sync.ok', { time: new Date(status.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
+function statusText(status, t, locale) {
+  if (status.state === 'syncing') return t('sync.syncing')
+  if (status.state === 'error') return t('sync.error')
+  if (status.state === 'offline') return t('sync.offline')
+  if (status.at) return t('sync.ok', { time: new Date(status.at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })
   return ''
 }
 
 // Sits at the right end of the top bar: Google sign-in when signed out, avatar + menu when signed in.
 export default function Account({ sync }) {
   const { enabled, user, ready, signIn, signOut } = useAuth()
+  const { t, locale } = useI18n()
   const [open, setOpen] = useState(false)
   const box = useRef(null)
 
@@ -43,9 +44,9 @@ export default function Account({ sync }) {
 
   if (!user) {
     return (
-      <button type="button" className="signin" onClick={signIn} title={ta('auth.why')} aria-label={ta('auth.signInGoogle')}>
+      <button type="button" className="signin" onClick={signIn} title={t('auth.why')} aria-label={t('auth.signInGoogle')}>
         {G}
-        <span>{ta('auth.signIn')}</span>
+        <span>{t('auth.signIn')}</span>
       </button>
     )
   }
@@ -59,7 +60,7 @@ export default function Account({ sync }) {
       <button
         type="button"
         className="dot avatar"
-        aria-label={ta('auth.menu')}
+        aria-label={t('auth.menu')}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
@@ -70,11 +71,11 @@ export default function Account({ sync }) {
         <div className="account-menu" role="menu">
           <b>{name}</b>
           {user.email && name !== user.email && <small>{user.email}</small>}
-          {sync && <p className={'sync-state ' + sync.status.state}>{statusText(sync.status)}</p>}
+          {sync && <p className={'sync-state ' + sync.status.state}>{statusText(sync.status, t, locale)}</p>}
           <div className="row">
             {sync && (
               <button type="button" className="ghost" onClick={() => sync.syncNow()} disabled={sync.status.state === 'syncing'}>
-                {ta('sync.now')}
+                {t('sync.now')}
               </button>
             )}
             <button
@@ -85,7 +86,7 @@ export default function Account({ sync }) {
                 signOut()
               }}
             >
-              {ta('auth.signOut')}
+              {t('auth.signOut')}
             </button>
           </div>
         </div>

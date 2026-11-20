@@ -10,6 +10,10 @@ export const pc = (n) => {
 export const noteName = (i, flat) => (flat ? FLATS : SHARPS)[((i % 12) + 12) % 12]
 export const prefersFlat = (i) => FLAT_KEYS.includes(noteName(i, true))
 
+// True for chord names like G, Bm7, Dsus4, C#m7b5, G/B. False for labels like Verse 1, Chorus, Bridge.
+export const isChord = (s) =>
+  /^[A-G][#b]?(?:maj|min|dim|aug|sus|add|m|M|°|ø|\+|\d|#|b|\(|\)|,|-)*(?:\/[A-G][#b]?)?$/.test(s.trim())
+
 export const transposeChord = (chord, n, flat) =>
   chord.replace(/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/, (m, root, quality, bass) => {
     if (pc(root) < 0) return m
@@ -19,7 +23,7 @@ export const transposeChord = (chord, n, flat) =>
   })
 
 export const transposeBody = (text, n, flat) =>
-  text.replace(/\[([^\]]+)\]/g, (m, c) => '[' + transposeChord(c.trim(), n, flat) + ']')
+  text.replace(/\[([^\]]+)\]/g, (m, c) => (isChord(c) ? '[' + transposeChord(c.trim(), n, flat) + ']' : m))
 
 export const transposeKey = (key, n) => {
   const minor = /m$/.test(key)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Sidebar from './components/Sidebar.jsx'
+import TopNav from './components/TopNav.jsx'
 import Journal from './components/Journal.jsx'
 import ChordSpace from './components/ChordSpace.jsx'
 import Theory from './components/Theory.jsx'
@@ -11,7 +11,33 @@ const VIEWS = {
   journal: 'Guitar journal',
   chords: 'Chord space',
   theory: 'Nhạc lý',
-  tools: 'Kết nối & beat',
+  tools: 'Beat & kết nối',
+}
+
+const SUB = {
+  journal: 'Lưu lại mọi bản cover và sáng tác, nghe lại mình đã tiến bộ tới đâu.',
+  chords: 'Hợp âm bạn tự mò ra, đổi tông chỉ với một chạm.',
+  theory: 'Âm giai, ngũ cung, hợp âm theo key, dò key từ tai nghe.',
+  tools: 'Máy nhịp, beat trống và các công cụ sáng tác yêu thích.',
+}
+
+function Waves() {
+  const colors = ['#b9d440', '#bc9bf3', '#b9d440', '#bc9bf3', '#ffffff']
+  return (
+    <svg className="waves" viewBox="0 0 520 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+      {colors.map((c, i) => (
+        <path
+          key={i}
+          d={`M0 ${30 + i * 36} C 60 ${0 + i * 36}, 100 ${70 + i * 36}, 160 ${30 + i * 36} S 260 ${0 + i * 36}, 320 ${30 + i * 36} S 420 ${70 + i * 36}, 520 ${30 + i * 36}`}
+          fill="none"
+          stroke={c}
+          strokeWidth={i === 4 ? 3 : 10}
+          strokeLinecap="round"
+          opacity={i === 4 ? 0.5 : 1}
+        />
+      ))}
+    </svg>
+  )
 }
 
 const currentView = () => {
@@ -45,14 +71,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <Sidebar view={view} />
-      <div className="content">
-        <div className="topbar">
-          <div>
-            <h1>{VIEWS[view]}</h1>
-            <p>Sổ Đàn · nhật ký guitar của bạn</p>
-          </div>
-        </div>
+      <TopNav view={view} />
+      <div className="hero">
+        <Waves />
+        <h1>{VIEWS[view]}</h1>
+        <p>{SUB[view]}</p>
+      </div>
         <main>
           {view === 'journal' && (
             <>
@@ -73,7 +97,6 @@ export default function App() {
           {view === 'theory' && <Theory onCreateSong={newSongFromProgression} />}
           {view === 'tools' && <Tools />}
         </main>
-      </div>
     </div>
   )
 }

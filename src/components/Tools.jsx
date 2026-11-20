@@ -148,7 +148,7 @@ function BeatMachine() {
             className={(pat.k[i] ? 'k' : pat.s[i] ? 's' : pat.h[i] ? 'h' : '') + (playing && i === now ? ' now' : '')} />
         ))}
       </div>
-      <p className="muted" style={{ marginTop: 8 }}>Xanh đậm: trống bass · Hồng: snare · Vàng: hi-hat. Chạm vào ô để đổi.</p>
+      <p className="muted" style={{ marginTop: 8 }}>Tím: trống bass · Tím nhạt: snare · Xanh chanh: hi-hat. Chạm vào ô để đổi.</p>
     </div>
   )
 }

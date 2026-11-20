@@ -38,8 +38,8 @@ function Fretboard({ root, scale, flat }) {
                   const x = f ? L + (f - 0.5) * fw : L - 16
                   return (
                     <g key={f}>
-                      <circle cx={x} cy={y} r={rr} fill={d === 0 ? '#3d4fd6' : '#2f9fd0'} />
-                      <text x={x} y={y + 4} textAnchor="middle" fontSize={rr > 11 ? 11 : 9} fontWeight="700" fill="#fff">{noteName(p, flat)}</text>
+                      <circle cx={x} cy={y} r={rr} fill={d === 0 ? '#7360f9' : '#b9d440'} />
+                      <text x={x} y={y + 4} textAnchor="middle" fontSize={rr > 11 ? 11 : 9} fontWeight="700" fill={d === 0 ? '#fff' : '#241f4f'}>{noteName(p, flat)}</text>
                     </g>
                   )
                 })}

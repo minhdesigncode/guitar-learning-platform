@@ -1,7 +1,7 @@
 const ITEMS = [
   {
     id: 'journal',
-    label: 'Guitar journal',
+    label: 'Journal',
     icon: (
       <>
         <rect x="4" y="3" width="16" height="18" rx="3" />
@@ -34,7 +34,7 @@ const ITEMS = [
   },
   {
     id: 'tools',
-    label: 'Kết nối và beat',
+    label: 'Beat & kết nối',
     icon: (
       <>
         <circle cx="12" cy="12" r="8" />
@@ -45,17 +45,21 @@ const ITEMS = [
   },
 ]
 
-export default function Sidebar({ view }) {
+// Floating pill menu across the top (moves to the bottom of the screen on phones).
+export default function TopNav({ view }) {
   return (
-    <aside className="rail">
-      <div className="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1c2142" strokeWidth="2" strokeLinecap="round">
-          <path d="M9 18V5l11-2v13" />
-          <circle cx="6" cy="18" r="3" />
-          <circle cx="17" cy="16" r="3" />
-        </svg>
-      </div>
-      <nav>
+    <header className="topnav">
+      <a className="brand" href="#journal">
+        <span className="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#b9d440" strokeWidth="2.4" strokeLinecap="round">
+            <path d="M9 18V5l11-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="17" cy="16" r="3" />
+          </svg>
+        </span>
+        Sổ Đàn
+      </a>
+      <nav className="pills">
         {ITEMS.map((it) => (
           <a key={it.id} href={'#' + it.id} title={it.label} className={view === it.id ? 'on' : ''}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>
@@ -63,6 +67,7 @@ export default function Sidebar({ view }) {
           </a>
         ))}
       </nav>
-    </aside>
+      <span className="dot" aria-hidden="true">M</span>
+    </header>
   )
 }

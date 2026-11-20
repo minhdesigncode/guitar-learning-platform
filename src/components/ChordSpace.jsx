@@ -1,20 +1,33 @@
 import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { transposeBody, transposeKey } from '../lib/music.js'
+import { isChord, transposeBody, transposeKey } from '../lib/music.js'
 import { uid } from '../lib/store.js'
 
-// Split the body into sections (a # heading starts a new one) so columns never cut a heading off its lines.
-function sections(body) {
+// A section heading is a line starting with #, or a line that is only a bracketed label such as [Verse 1] or [Chorus].
+const heading = (line) => {
+  if (/^\s*#/.test(line)) return line.replace(/^\s*#+\s*/, '')
+  const m = line.match(/^\s*\[([^\]]+)\]\s*$/)
+  return m && !isChord(m[1]) ? m[1].trim() : null
+}
+
+// Split the body into stanzas (a blank line or a heading starts a new one). Columns may break between
+// stanzas but never inside one, so a heading stays with its first lines.
+function stanzas(body) {
   const out = [[]]
+  const last = () => out[out.length - 1]
   body.split('\n').forEach((line) => {
-    if (/^\s*#/.test(line) && out[out.length - 1].length) out.push([])
-    out[out.length - 1].push(line)
+    if (!line.trim()) {
+      if (last().length) out.push([])
+      return
+    }
+    if (heading(line) !== null && last().length) out.push([])
+    last().push(line)
   })
-  return out
+  return out.filter((b) => b.length)
 }
 
 function Line({ line }) {
-  if (/^\s*#/.test(line)) return <div className="sec">{line.replace(/^\s*#+\s*/, '')}</div>
-  if (!line.trim()) return <div className="ln">&nbsp;</div>
+  const h = heading(line)
+  if (h !== null) return <div className="sec">{h}</div>
   if (!line.includes('[')) return <div className="ln">{line}</div>
   const parts = line.split(/\[([^\]]+)\]/)
   const segs = []
@@ -35,7 +48,7 @@ function Line({ line }) {
 const Sheet = forwardRef(function Sheet({ body, zoom, cols }, ref) {
   return (
     <div ref={ref} className="sheet" style={{ '--z': zoom, columnCount: cols }}>
-      {sections(body).map((sec, i) => (
+      {stanzas(body).map((sec, i) => (
         <div key={i} className="blk">
           {sec.map((line, j) => <Line key={j} line={line} />)}
         </div>
@@ -136,7 +149,7 @@ function Editor({ song, onSave, onCancel }) {
       </div>
       <label htmlFor="eb">Lời và hợp âm</label>
       <p className="muted" style={{ margin: '0 0 6px' }}>
-        Đặt hợp âm trong ngoặc vuông ngay trước chữ: <code>[G]Met you on a [Bm]road</code>. Dòng bắt đầu bằng <code>#</code> là tên đoạn.
+        Đặt hợp âm trong ngoặc vuông ngay trước chữ: <code>[G]Met you on a [Bm]road</code>. Tên đoạn viết <code># Verse 1</code> hoặc <code>[Verse 1]</code> trên một dòng riêng.
       </p>
       <textarea id="eb" value={f.body} onChange={set('body')} />
       <div className="row" style={{ marginTop: 12 }}>

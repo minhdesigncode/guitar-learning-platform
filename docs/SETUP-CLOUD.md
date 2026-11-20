@@ -37,7 +37,7 @@ Callback URL để dùng ở bước 4: `https://<project-ref>.supabase.co/auth/
    - Site URL: `https://guitar-learning-platform-pied.vercel.app`
    - Redirect URLs, thêm:
      - `https://guitar-learning-platform-pied.vercel.app/**`
-     - `https://guitar-learning-platform-*.vercel.app/**` (cho bản preview của PR)
+     - `https://*-nngocminhwork-4571s-projects.vercel.app/**` (cho bản preview của PR)
      - `http://localhost:5173/**`
 
 ## 6. Gắn env lên Vercel

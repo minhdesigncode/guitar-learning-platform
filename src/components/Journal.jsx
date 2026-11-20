@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadMedia, deleteMedia } from '../lib/store.js'
+import Icon from './Icon.jsx'
 
 export function Media({ id, type }) {
   const [url, setUrl] = useState(null)
@@ -48,9 +49,9 @@ export function Recorder({ onDone }) {
   return (
     <div style={{ marginTop: 12 }}>
       {state === 'idle' ? (
-        <button type="button" className="ghost" onClick={start}>● Thu âm ngay</button>
+        <button type="button" className="ghost rec-start" onClick={start}><Icon name="rec" />Thu âm ngay</button>
       ) : (
-        <button type="button" onClick={() => rec.current.stop()}>■ Dừng thu</button>
+        <button type="button" className="rec-live" onClick={() => rec.current.stop()}><Icon name="stop" />Dừng thu</button>
       )}
       {error && <p className="note">{error}</p>}
     </div>

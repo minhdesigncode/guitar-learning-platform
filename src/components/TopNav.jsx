@@ -57,6 +57,9 @@ const ITEMS = [
   },
 ]
 
+// Shorter names for the phone tab bar, where every item shows its label under the icon.
+const SHORT = { chords: 'Chord', tools: 'Beat', creative: 'Sáng tạo' }
+
 // Floating pill menu across the top (moves to the bottom of the screen on phones).
 export default function TopNav({ view }) {
   return (
@@ -73,9 +76,11 @@ export default function TopNav({ view }) {
       </a>
       <nav className="pills">
         {ITEMS.map((it) => (
-          <a key={it.id} href={'#' + it.id} title={it.label} className={view === it.id ? 'on' : ''}>
+          <a key={it.id} href={'#' + it.id} title={it.label} aria-label={it.label} className={view === it.id ? 'on' : ''}
+            aria-current={view === it.id ? 'page' : undefined}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>
             <span>{it.label}</span>
+            <em aria-hidden="true">{SHORT[it.id] || it.label}</em>
           </a>
         ))}
       </nav>

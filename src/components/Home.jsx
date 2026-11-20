@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import TheoryOfWeek from './CircleOfFifths.jsx'
+import Icon from './Icon.jsx'
 import './home.css'
 
 const chordsIn = (body = '') => {
@@ -130,7 +131,7 @@ function MiniMetronome() {
         {[0, 1, 2, 3].map((i) => <span key={i} className={on && beat === i ? 'now' : ''} />)}
       </div>
       <div className="row">
-        <button className="pick" style={{ flex: 1 }} onClick={toggle}>{on ? '■ Dừng' : '▶ Chạy'}</button>
+        <button className="pick" style={{ flex: 1 }} onClick={toggle}>{on ? <><Icon name="stop" />Dừng</> : <><Icon name="play" />Chạy</>}</button>
         <button className="ghost" style={{ flex: 1 }} onClick={tap}>Gõ nhịp</button>
       </div>
     </div>
@@ -165,7 +166,7 @@ function PracticeWeek({ journal }) {
           <span className="w-kicker">Bản thu</span>
           <h2>7 ngày qua</h2>
         </div>
-        <span className="w-streak" title="Số ngày liên tiếp có bản thu">🔥 {streak} ngày</span>
+        <span className="w-streak" title="Số ngày liên tiếp có bản thu">Chuỗi {streak} ngày</span>
       </div>
       <div className="w-days">
         {days.map((x) => {

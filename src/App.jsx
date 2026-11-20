@@ -4,6 +4,7 @@ import Journal from './components/Journal.jsx'
 import ChordSpace from './components/ChordSpace.jsx'
 import Theory from './components/Theory.jsx'
 import Tools from './components/Tools.jsx'
+import CreativeSpace from './components/CreativeSpace.jsx'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS } from './lib/seed.js'
@@ -13,6 +14,7 @@ const VIEWS = {
   chords: 'Chord space',
   theory: 'Nhạc lý',
   tools: 'Beat này beat kia',
+  creative: 'Creative space',
 }
 
 const SUB = {
@@ -20,6 +22,7 @@ const SUB = {
   chords: 'Hợp âm bạn tự mò ra, đổi tông chỉ với một chạm.',
   theory: 'Âm giai, ngũ cung, hợp âm theo key, dò key từ tai nghe.',
   tools: 'Máy nhịp và beat trống để tập cùng.',
+  creative: 'Góc vẽ nét mảnh: một cây guitar phác bằng hair-line, rê chuột qua để gảy dây.',
 }
 
 function Waves() {
@@ -124,6 +127,7 @@ export default function App() {
           )}
           {view === 'theory' && <Theory onCreateSong={newSongFromProgression} />}
           {view === 'tools' && <Tools />}
+          {view === 'creative' && <CreativeSpace />}
         </main>
     </div>
   )

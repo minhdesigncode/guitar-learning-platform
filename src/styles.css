@@ -111,3 +111,22 @@ label{display:block;font-size:13.5px;font-weight:500;margin:12px 0 4px;color:var
 .note{min-height:1.4em;font-size:14px;color:var(--mute)}
 audio,video{width:100%;margin-top:10px;border-radius:14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* creative space: a hair-line figure on a white plate */
+.creative{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:900px){.creative{grid-template-columns:minmax(0,1fr)}}
+.creative-plate{position:relative;padding:18px}
+.creative-tags{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.creative-read{font-size:13.5px;font-weight:600;padding:4px 14px;border-radius:999px;background:var(--soft);color:var(--mute);font-variant-numeric:tabular-nums}
+.creative-read.on{background:var(--violet);color:#fff}
+.creative-stage{width:100%;cursor:crosshair;
+  --hairline-plate:var(--card);--hairline-hi:var(--violet2);
+  --hairline-edge:light-dark(#857eb5,#8e87c0);--hairline-mid:light-dark(#b9b1dc,#565089);--hairline-lo:light-dark(#e2daf2,#38325f)}
+.creative-stage>svg{display:block;width:100%;height:100%}
+.creative-side h2{margin-bottom:6px}
+.creative-now{margin:18px 0 6px;padding:16px 20px;border-radius:24px;background:var(--lime);color:var(--deep)}
+.creative-now small{display:block;font-size:13.5px;font-weight:500}
+.creative-now b{display:block;font-size:40px;line-height:1.1;font-weight:700;margin:4px 0 2px}
+.creative-now .muted{color:#4d5a12}
+.creative-credit{margin:18px 0 0;font-size:13px}
+.creative-credit a{color:var(--violet2)}

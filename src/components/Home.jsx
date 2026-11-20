@@ -162,7 +162,7 @@ function PracticeWeek({ journal }) {
     <div className="card w-practice">
       <div className="w-head">
         <div>
-          <span className="w-kicker">Journal</span>
+          <span className="w-kicker">Bản thu</span>
           <h2>7 ngày qua</h2>
         </div>
         <span className="w-streak" title="Số ngày liên tiếp có bản thu">🔥 {streak} ngày</span>

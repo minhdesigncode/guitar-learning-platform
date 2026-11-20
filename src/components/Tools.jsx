@@ -13,34 +13,6 @@ const load = (name) => {
   return { k: toBool(p.k), s: toBool(p.s), h: toBool(p.h) }
 }
 
-const CHORD_SITES = [
-  ['Hợp Âm Chuẩn', 'hopamchuan.com', 'https://hopamchuan.com', 'Kho hợp âm nhạc Việt lớn, có đổi tông.'],
-  ['Hợp Âm Việt', 'hopamviet.vn', 'https://hopamviet.vn', 'Hợp âm nhạc Việt, có sơ đồ bấm.'],
-  ['Ultimate Guitar', 'ultimate-guitar.com', 'https://www.ultimate-guitar.com', 'Tab và hợp âm nhạc quốc tế.'],
-  ['Chordify', 'chordify.net', 'https://chordify.net', 'Tự dò hợp âm từ bài hát.'],
-  ['Songsterr', 'songsterr.com', 'https://www.songsterr.com', 'Tab có phát lại theo nhịp.'],
-]
-const CREATE_SITES = [
-  ['Suno', 'suno.com', 'https://suno.com', 'AI tạo bài hát từ lời và mô tả phong cách.'],
-  ['BandLab', 'bandlab.com', 'https://www.bandlab.com', 'Thu âm nhiều track, beat và mix miễn phí.'],
-  ['Splice Beatmaker', 'splice.com', 'https://splice.com/sounds/beatmaker', 'Dựng beat trống trên trình duyệt.'],
-  ['Claude', 'claude.ai', 'https://claude.ai', 'Viết lời, làm thơ, gợi ý vòng hợp âm.'],
-]
-
-function Links({ items }) {
-  return (
-    <div className="links">
-      {items.map(([t, d, u, x]) => (
-        <a key={u} href={u} target="_blank" rel="noopener noreferrer">
-          <b>{t}</b>
-          <span className="muted">{d}</span>
-          <p style={{ margin: '6px 0 0' }}>{x}</p>
-        </a>
-      ))}
-    </div>
-  )
-}
-
 function BeatMachine() {
   const [style, setStyle] = useState('Rock')
   const [pat, setPat] = useState(() => load('Rock'))
@@ -157,10 +129,6 @@ export default function Tools() {
   return (
     <section>
       <BeatMachine />
-      <h2 style={{ margin: '32px 0 12px' }}>Tra hợp âm</h2>
-      <Links items={CHORD_SITES} />
-      <h2 style={{ margin: '32px 0 12px' }}>AI sáng tác, thu âm &amp; beat</h2>
-      <Links items={CREATE_SITES} />
     </section>
   )
 }

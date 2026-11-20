@@ -1,7 +1,7 @@
 const ITEMS = [
   {
     id: 'journal',
-    label: 'Journal',
+    label: 'Trang chủ',
     icon: (
       <>
         <rect x="4" y="3" width="16" height="18" rx="3" />
@@ -34,7 +34,7 @@ const ITEMS = [
   },
   {
     id: 'tools',
-    label: 'Beat & kết nối',
+    label: 'Beat này beat kia',
     icon: (
       <>
         <circle cx="12" cy="12" r="8" />

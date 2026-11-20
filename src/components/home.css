@@ -1,6 +1,6 @@
 /* Home widgets */
 .home{display:grid;gap:22px;margin-bottom:28px}
-.home-side{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.home-side{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch}
 @media(max-width:1000px){.home-side{grid-template-columns:repeat(2,minmax(0,1fr))}.home-side>.w-songs{grid-column:1/-1}}
 @media(max-width:640px){.home-side{grid-template-columns:minmax(0,1fr)}}
 .w-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -74,3 +74,8 @@
 .cof-notes span{min-width:48px;padding:8px 12px;border-radius:16px;background:var(--soft);text-align:center;font-weight:700;font-size:17px}
 .cof-notes span.root{background:var(--violet);color:#fff}
 .cof-notes small{display:block;font-size:11.5px;font-weight:500;opacity:.75}
+
+/* recording box in the Chord space editor and viewer */
+.rec-box{margin-top:18px;padding:16px 18px;border-radius:22px;background:var(--soft)}
+.rec-box h3{font-size:16px}
+.rec-box input,.rec-box select{background:var(--card)}

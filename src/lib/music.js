@@ -30,11 +30,12 @@ export const transposeKey = (key, n) => {
 }
 
 export const SCALES = [
-  { name: 'Trưởng (Major)', iv: [0, 2, 4, 5, 7, 9, 11], minor: false, desc: 'Âm giai sáng, vui, nền tảng của đa số bài pop.' },
-  { name: 'Thứ tự nhiên (Natural minor)', iv: [0, 2, 3, 5, 7, 8, 10], minor: true, desc: 'Buồn, sâu lắng hơn. Cùng nốt với key trưởng cách 1,5 cung lên.' },
-  { name: 'Ngũ cung trưởng (Major pentatonic)', iv: [0, 2, 4, 7, 9], minor: false, desc: '5 nốt, bỏ bậc 4 và 7 của âm giai trưởng. Gần màu nhạc dân gian, rất dễ ứng tác.' },
-  { name: 'Ngũ cung thứ (Minor pentatonic)', iv: [0, 3, 5, 7, 10], minor: true, desc: 'Hộp ngũ cung quen thuộc để solo rock, blues.' },
-  { name: 'Blues', iv: [0, 3, 5, 6, 7, 10], minor: true, desc: 'Ngũ cung thứ thêm “blue note” (bậc 4 thăng).' },
+  // Names and descriptions: i18n keys scale.<id> and scale.<id>.desc
+  { id: 'major', iv: [0, 2, 4, 5, 7, 9, 11], minor: false },
+  { id: 'minor', iv: [0, 2, 3, 5, 7, 8, 10], minor: true },
+  { id: 'majPenta', iv: [0, 2, 4, 7, 9], minor: false },
+  { id: 'minPenta', iv: [0, 3, 5, 7, 10], minor: true },
+  { id: 'blues', iv: [0, 3, 5, 6, 7, 10], minor: true },
 ]
 
 export const MAJOR_CHORDS = [['', 0, 'I'], ['m', 2, 'ii'], ['m', 4, 'iii'], ['', 5, 'IV'], ['', 7, 'V'], ['m', 9, 'vi'], ['dim', 11, 'vii°']]
@@ -43,15 +44,8 @@ export const MINOR_CHORDS = [['m', 0, 'i'], ['dim', 2, 'ii°'], ['', 3, 'III'], 
 export const chordsOf = (root, flat, minor) =>
   (minor ? MINOR_CHORDS : MAJOR_CHORDS).map(([q, iv, rn]) => ({ chord: noteName(root + iv, flat) + q, roman: rn }))
 
-export const PROGRESSIONS = [
-  ['I V vi IV', 'Vòng pop “bốn hợp âm”'],
-  ['I vi IV V', 'Vòng thập niên 50–60, ngọt kiểu Beatles'],
-  ['vi IV I V', 'Vòng ballad buồn'],
-  ['ii V I', 'Vòng jazz kinh điển'],
-  ['I IV V IV', 'Vòng rock cơ bản'],
-  ['I iii IV V', 'Đi lên nhẹ nhàng, hợp verse kể chuyện'],
-  ['IV V iii vi', 'Vòng “canon” kiểu nhạc Nhật/Hàn'],
-]
+// Descriptions: i18n keys prog.<roman numerals>
+export const PROGRESSIONS = ['I V vi IV', 'I vi IV V', 'vi IV I V', 'ii V I', 'I IV V IV', 'I iii IV V', 'IV V iii vi']
 
 export const progressionIn = (root, flat, prog) => {
   const ch = chordsOf(root, flat, false)

@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, u
 import { transposeBody, transposeKey } from '../lib/music.js'
 import { uid } from '../lib/store.js'
 import { Media, Recorder } from './Journal.jsx'
+import { useI18n, useT } from '../i18n/index.jsx'
 
 // Split the body into sections (a # heading starts a new one) so columns never cut a heading off its lines.
 function sections(body) {
@@ -118,6 +119,7 @@ function fitSheet(el, bar) {
 }
 
 function Editor({ song, onSave, onCancel }) {
+  const t = useT()
   const [f, setF] = useState(song)
   const [file, setFile] = useState(null)
   const [kind, setKind] = useState('s')
@@ -128,43 +130,43 @@ function Editor({ song, onSave, onCancel }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   return (
     <div className="card">
-      <h2>{song.id ? 'Sửa bài' : 'Bài mới'}</h2>
-      <label htmlFor="et">Tên bài</label>
+      <h2>{song.id ? t('editor.edit') : t('editor.new')}</h2>
+      <label htmlFor="et">{t('editor.title')}</label>
       <input id="et" value={f.title} onChange={set('title')} />
       <div className="row">
         <div style={{ flex: 1 }}>
-          <label htmlFor="ek">Key</label>
+          <label htmlFor="ek">{t('key')}</label>
           <input id="ek" value={f.key} onChange={set('key')} />
         </div>
         <div style={{ flex: 1 }}>
-          <label htmlFor="ec">Capo</label>
+          <label htmlFor="ec">{t('editor.capo')}</label>
           <input id="ec" type="number" min="0" max="12" value={f.capo} onChange={set('capo')} />
         </div>
       </div>
-      <label htmlFor="eb">Lời và hợp âm</label>
+      <label htmlFor="eb">{t('editor.body')}</label>
       <p className="muted" style={{ margin: '0 0 6px' }}>
-        Đặt hợp âm trong ngoặc vuông ngay trước chữ: <code>[G]Met you on a [Bm]road</code>. Dòng bắt đầu bằng <code>#</code> là tên đoạn.
+        {t('editor.helpA')}<code>[G]Met you on a [Bm]road</code>{t('editor.helpB')}<code>#</code>{t('editor.helpC')}
       </p>
       <textarea id="eb" value={f.body} onChange={set('body')} />
       <div className="rec-box">
-        <h3>Bản thu <span className="muted" style={{ fontWeight: 400, fontSize: 14 }}>(không bắt buộc)</span></h3>
-        <p className="muted" style={{ margin: '2px 0 0' }}>Đính kèm file hoặc thu âm ngay. Bản thu sẽ hiện ở trang chủ và dưới bài này.</p>
+        <h3>{t('editor.recTitle')} <span className="muted" style={{ fontWeight: 400, fontSize: 14 }}>{t('editor.optional')}</span></h3>
+        <p className="muted" style={{ margin: '2px 0 0' }}>{t('editor.recHelp')}</p>
         <div className="row" style={{ marginTop: 6 }}>
           <div style={{ flex: '1 1 140px' }}>
-            <label htmlFor="rk">Loại</label>
+            <label htmlFor="rk">{t('editor.kind')}</label>
             <select id="rk" value={kind} onChange={(e) => setKind(e.target.value)}>
-              <option value="s">Sáng tác</option>
-              <option value="c">Cover</option>
+              <option value="s">{t('kind.s')}</option>
+              <option value="c">{t('kind.c')}</option>
             </select>
           </div>
           <div style={{ flex: '2 1 220px' }}>
-            <label htmlFor="rf">File ghi âm hoặc video</label>
+            <label htmlFor="rf">{t('editor.file')}</label>
             <input id="rf" ref={fileInput} type="file" accept="audio/*,video/*" onChange={(e) => { setFile(e.target.files[0] || null); setRecMsg('') }} />
           </div>
         </div>
-        <Recorder onDone={(blob) => { setFile(blob); if (fileInput.current) fileInput.current.value = ''; setRecMsg('Đã thu xong, bấm “Lưu bài” để giữ lại.') }} />
+        <Recorder onDone={(blob) => { setFile(blob); if (fileInput.current) fileInput.current.value = ''; setRecMsg(t('editor.recDone')) }} />
         {preview && (String(file.type).startsWith('video') ? <video controls src={preview} /> : <audio controls src={preview} />)}
-        {file && <button className="ghost" style={{ marginTop: 8, minHeight: 36, padding: '6px 14px' }} onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; setRecMsg('') }}>Bỏ bản thu</button>}
+        {file && <button className="ghost" style={{ marginTop: 8, minHeight: 36, padding: '6px 14px' }} onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; setRecMsg('') }}>{t('editor.removeRec')}</button>}
         {recMsg && <p className="note">{recMsg}</p>}
       </div>
       <div className="row" style={{ marginTop: 12 }}>
@@ -172,14 +174,14 @@ function Editor({ song, onSave, onCancel }) {
           className="pick"
           onClick={() =>
             onSave(
-              { ...f, title: f.title.trim() || 'Bài chưa đặt tên', key: f.key.trim() || 'C', capo: +f.capo || 0 },
+              { ...f, title: f.title.trim() || t('editor.untitled'), key: f.key.trim() || 'C', capo: +f.capo || 0 },
               file && { file, kind },
             )
           }
         >
-          Lưu bài
+          {t('editor.save')}
         </button>
-        <button className="ghost" onClick={onCancel}>Huỷ</button>
+        <button className="ghost" onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>
   )
@@ -193,6 +195,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
   const [q, setQ] = useState('')
   const [sure, setSure] = useState(false)
   const [v, setView] = useView()
+  const { t, locale } = useI18n()
   const sheetRef = useRef(null)
   const barRef = useRef(null)
 
@@ -256,13 +259,13 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
     <div className={v.wide && cur && !editing ? 'grid solo' : 'grid'}>
       <div className="card">
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          <h2>Bài của bạn</h2>
-          <button className="ghost" onClick={() => setEditing({ title: '', key: 'C', capo: 0, body: '# Verse 1\n[C]' })}>
-            + Bài mới
+          <h2>{t('cs.yourSongs')}</h2>
+          <button className="ghost" onClick={() => setEditing({ title: '', key: 'C', capo: 0, body: t('song.template') })}>
+            {t('home.newSong')}
           </button>
         </div>
-        <input placeholder="Tìm bài…" style={{ margin: '12px 0' }} value={q} onChange={(e) => setQ(e.target.value)} />
-        {!songs.length && <p className="note">Chưa có bài nào. Bấm “+ Bài mới”.</p>}
+        <input placeholder={t('cs.search')} style={{ margin: '12px 0' }} value={q} onChange={(e) => setQ(e.target.value)} />
+        {!songs.length && <p className="note">{t('cs.empty')}</p>}
         <ul className="list">
           {sorted
             .filter((s) => !q || s.title.toLowerCase().includes(q.toLowerCase()))
@@ -270,7 +273,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
               <li key={s.id} className={s.id === curId && !editing ? 'on' : ''} onClick={() => select(s.id)} tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && select(s.id)}>
                 <b>{s.title}</b>
-                <div className="muted">Key {s.key}{s.capo ? ' · capo ' + s.capo : ''}</div>
+                <div className="muted">{t('keyOf', { key: s.key })}{s.capo ? ' · ' + t('capoOf', { n: s.capo }) : ''}</div>
               </li>
             ))}
         </ul>
@@ -279,63 +282,63 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
         {editing ? (
           <Editor key={editing.id || 'new' + editing.title} song={editing} onSave={save} onCancel={() => setEditing(null)} />
         ) : !cur ? (
-          <div className="card"><p className="muted">Chọn một bài ở danh sách, hoặc tạo bài mới.</p></div>
+          <div className="card"><p className="muted">{t('cs.pick')}</p></div>
         ) : (
           <div className="card">
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <h2>{cur.title}</h2>
-              <button className="ghost" onClick={() => setEditing(cur)}>Sửa</button>
+              <button className="ghost" onClick={() => setEditing(cur)}>{t('cs.edit')}</button>
             </div>
             <div className="row" style={{ margin: '12px 0 4px' }}>
-              <button className="ghost" onClick={() => shift(-1)} aria-label="Hạ nửa cung">− ½</button>
+              <button className="ghost" onClick={() => shift(-1)} aria-label={t('cs.down')}>− ½</button>
               <span className="big" style={{ fontSize: 28, minWidth: '3ch', textAlign: 'center' }}>{view.key}</span>
-              <button className="ghost" onClick={() => shift(1)} aria-label="Nâng nửa cung">+ ½</button>
+              <button className="ghost" onClick={() => shift(1)} aria-label={t('cs.up')}>+ ½</button>
               {offset !== 0 && (
                 <>
                   <button className="pick" onClick={() => {
                     save({ ...cur, key: view.key, body: transposeBody(cur.body, offset, view.flat) })
                     setOffset(0)
-                  }}>Lưu tông {view.key}</button>
-                  <button className="ghost" onClick={() => setOffset(0)}>Về tông gốc</button>
+                  }}>{t('cs.saveKey', { key: view.key })}</button>
+                  <button className="ghost" onClick={() => setOffset(0)}>{t('cs.resetKey')}</button>
                 </>
               )}
             </div>
             <p className="muted">
-              {offset !== 0 && `Đã ${offset > 0 ? 'nâng' : 'hạ'} ${Math.abs(offset) / 2} cung từ ${cur.key}. `}
-              {cur.capo ? `Capo ${cur.capo}.` : ''}
+              {offset !== 0 && t('cs.shifted', { offset, from: cur.key })}
+              {cur.capo ? t('cs.capo', { n: cur.capo }) : ''}
             </p>
-            <div ref={barRef} className="zoombar" role="toolbar" aria-label="Cỡ chữ và bố cục lời">
+            <div ref={barRef} className="zoombar" role="toolbar" aria-label={t('cs.toolbar')}>
               <div className="seg">
-                <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label="Thu nhỏ chữ" title="Thu nhỏ">
+                <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label={t('cs.zoomOut')} title={t('cs.zoomOutTitle')}>
                   <Mag />
                 </button>
-                <button className="ghost pct" onClick={() => setView({ fit: false, zoom: 1 })} title="Về 100%">
+                <button className="ghost pct" onClick={() => setView({ fit: false, zoom: 1 })} title={t('cs.zoomReset')}>
                   {Math.round(v.zoom * 100)}%
                 </button>
-                <button className="ghost icon" onClick={() => zoomBy(0.1)} disabled={v.zoom >= ZMAX} aria-label="Phóng to chữ" title="Phóng to">
+                <button className="ghost icon" onClick={() => zoomBy(0.1)} disabled={v.zoom >= ZMAX} aria-label={t('cs.zoomIn')} title={t('cs.zoomInTitle')}>
                   <Mag plus />
                 </button>
               </div>
-              <button className={v.fit ? 'pick' : 'ghost'} onClick={fitNow} aria-pressed={v.fit} title="Tự co chữ và chia cột để thấy trọn bài">
-                Vừa màn hình
+              <button className={v.fit ? 'pick' : 'ghost'} onClick={fitNow} aria-pressed={v.fit} title={t('cs.fitTitle')}>
+                {t('cs.fit')}
               </button>
-              <div className="seg" role="group" aria-label="Số cột">
+              <div className="seg" role="group" aria-label={t('cs.cols')}>
                 {[1, 2, 3].map((n) => (
                   <button key={n} className={v.cols === n ? 'pick' : 'ghost'} aria-pressed={v.cols === n}
-                    onClick={() => setView({ fit: false, cols: n })}>{n} cột</button>
+                    onClick={() => setView({ fit: false, cols: n })}>{t('cs.colN', { n })}</button>
                 ))}
               </div>
               <button className="ghost" onClick={() => setView({ wide: !v.wide })} aria-pressed={v.wide}>
-                {v.wide ? 'Hiện danh sách' : 'Ẩn danh sách'}
+                {v.wide ? t('cs.showList') : t('cs.hideList')}
               </button>
             </div>
             <Sheet ref={sheetRef} body={body} zoom={v.zoom} cols={v.cols} />
             {recs.length > 0 && (
               <div className="rec-box">
-                <h3>Bản thu của bài này</h3>
+                <h3>{t('cs.recs')}</h3>
                 {recs.map((r) => (
                   <div key={r.id} style={{ marginTop: 10 }}>
-                    <span className="muted">{new Date(r.date).toLocaleDateString('vi-VN')} · {r.kind === 'c' ? 'Cover' : 'Sáng tác'}</span>
+                    <span className="muted">{new Date(r.date).toLocaleDateString(locale)} · {t(r.kind === 'c' ? 'kind.c' : 'kind.s')}</span>
                     {r.mediaType && <Media id={r.id} type={r.mediaType} />}
                   </div>
                 ))}
@@ -347,7 +350,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
                 setSongs(songs.filter((s) => s.id !== cur.id))
                 setCurId(null)
                 setSure(false)
-              }}>{sure ? 'Bấm lần nữa để xoá' : 'Xoá bài'}</button>
+              }}>{sure ? t('confirmDelete') : t('cs.deleteSong')}</button>
             </div>
           </div>
         )}

@@ -21,12 +21,12 @@ function load(name, src) {
 /** Intensity 0..1 to the figure's own number: two straight lines meeting at 0.5, as on the bench. */
 const scale = ([lo, mid, hi], i) => (i <= 0.5 ? lo + (i / 0.5) * (mid - lo) : mid + ((i - 0.5) / 0.5) * (hi - mid))
 
-export function mountGuitar(stage, { intensity = 0.5, onRead } = {}) {
+export function mountGuitar(stage, { intensity = 0.5, onRead, label } = {}) {
   const spec = load('guitar', guitarSrc)
   HL.inject(document)
   stage.setAttribute('data-hairline', spec.name)
   stage.setAttribute('role', 'img')
-  stage.setAttribute('aria-label', 'Cây guitar thùng nằm ngửa, vẽ nét mảnh: rê chuột qua dây nào thì dây đó được gảy.')
+  if (label) stage.setAttribute('aria-label', label)
   const svg = HL.mk('svg', { viewBox: '0 0 400 320', 'aria-hidden': 'true' }, stage)
   const read = {
     set textContent(v) { onRead?.(v == null ? '' : String(v)) },

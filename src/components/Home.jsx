@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import TheoryOfWeek from './CircleOfFifths.jsx'
 import Icon from './Icon.jsx'
 import './home.css'
+import { useI18n, useT } from '../i18n/index.jsx'
 
 const chordsIn = (body = '') => {
   const seen = []
@@ -13,26 +14,27 @@ const chordsIn = (body = '') => {
   return seen
 }
 
-const ago = (t) => {
-  const d = Math.floor((Date.now() - t) / 86400000)
-  if (d <= 0) return 'hôm nay'
-  if (d === 1) return 'hôm qua'
-  if (d < 30) return `${d} ngày trước`
-  return new Date(t).toLocaleDateString('vi-VN')
+const ago = (time, t, locale) => {
+  const d = Math.floor((Date.now() - time) / 86400000)
+  if (d <= 0) return t('ago.today')
+  if (d === 1) return t('ago.yesterday')
+  if (d < 30) return t('ago.days', { n: d })
+  return new Date(time).toLocaleDateString(locale)
 }
 
 function RecentSongs({ songs, onOpen, onNew }) {
+  const { t, locale } = useI18n()
   const recent = [...songs].sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, 5)
   return (
     <div className="card w-songs">
       <div className="w-head">
         <div>
-          <span className="w-kicker">Chord space</span>
-          <h2>Bài mới nhất</h2>
+          <span className="w-kicker">{t('nav.chords')}</span>
+          <h2>{t('home.latest')}</h2>
         </div>
-        <button className="ghost w-sm" onClick={onNew}>+ Bài mới</button>
+        <button className="ghost w-sm" onClick={onNew}>{t('home.newSong')}</button>
       </div>
-      {!recent.length && <p className="note">Chưa có bài nào trong Chord space.</p>}
+      {!recent.length && <p className="note">{t('home.noSongs')}</p>}
       <ul className="w-list">
         {recent.map((s) => (
           <li key={s.id}>
@@ -40,9 +42,9 @@ function RecentSongs({ songs, onOpen, onNew }) {
               <span className="w-key">{s.key || '?'}</span>
               <span className="w-main">
                 <b>{s.title}</b>
-                <span className="w-chords">{chordsIn(s.body).join(' · ') || 'Chưa có hợp âm'}</span>
+                <span className="w-chords">{chordsIn(s.body).join(' · ') || t('home.noChords')}</span>
               </span>
-              <span className="muted w-when">{s.updated ? ago(s.updated) : ''}</span>
+              <span className="muted w-when">{s.updated ? ago(s.updated, t, locale) : ''}</span>
             </button>
           </li>
         ))}
@@ -52,6 +54,7 @@ function RecentSongs({ songs, onOpen, onNew }) {
 }
 
 function MiniMetronome() {
+  const t = useT()
   const [bpm, setBpm] = useState(88)
   const [on, setOn] = useState(false)
   const [beat, setBeat] = useState(-1)
@@ -116,23 +119,23 @@ function MiniMetronome() {
     <div className="card w-metro">
       <div className="w-head">
         <div>
-          <span className="w-kicker">Beat nhanh</span>
-          <h2>Máy nhịp</h2>
+          <span className="w-kicker">{t('metro.kicker')}</span>
+          <h2>{t('metro.title')}</h2>
         </div>
-        <a className="w-link" href="#tools">Beat trống ›</a>
+        <a className="w-link" href="#tools">{t('metro.drums')}</a>
       </div>
       <div className="w-bpm">
-        <button className="ghost w-round" aria-label="Giảm tempo" onClick={() => set(bpm - 1)}>−</button>
+        <button className="ghost w-round" aria-label={t('metro.slower')} onClick={() => set(bpm - 1)}>−</button>
         <div><b>{bpm}</b><small>bpm</small></div>
-        <button className="ghost w-round" aria-label="Tăng tempo" onClick={() => set(bpm + 1)}>+</button>
+        <button className="ghost w-round" aria-label={t('metro.faster')} onClick={() => set(bpm + 1)}>+</button>
       </div>
-      <input type="range" min="40" max="220" value={bpm} aria-label="Tempo" onChange={(e) => set(+e.target.value)} />
+      <input type="range" min="40" max="220" value={bpm} aria-label={t('metro.tempo')} onChange={(e) => set(+e.target.value)} />
       <div className="w-beats" aria-hidden="true">
         {[0, 1, 2, 3].map((i) => <span key={i} className={on && beat === i ? 'now' : ''} />)}
       </div>
       <div className="row">
-        <button className="pick" style={{ flex: 1 }} onClick={toggle}>{on ? <><Icon name="stop" />Dừng</> : <><Icon name="play" />Chạy</>}</button>
-        <button className="ghost" style={{ flex: 1 }} onClick={tap}>Gõ nhịp</button>
+        <button className="pick" style={{ flex: 1 }} onClick={toggle}>{on ? <><Icon name="stop" />{t('stop')}</> : <><Icon name="play" />{t('metro.start')}</>}</button>
+        <button className="ghost" style={{ flex: 1 }} onClick={tap}>{t('metro.tap')}</button>
       </div>
     </div>
   )
@@ -141,6 +144,7 @@ function MiniMetronome() {
 const dayKey = (t) => new Date(t).toDateString()
 
 function PracticeWeek({ journal }) {
+  const { t, locale } = useI18n()
   const days = [...Array(7)].map((_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
@@ -157,16 +161,16 @@ function PracticeWeek({ journal }) {
   }
   const week = days.reduce((n, x) => n + (count[dayKey(x)] || 0), 0)
   const last = journal.reduce((m, j) => Math.max(m, j.date || 0), 0)
-  const DOW = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+  const DOW = t('practice.dow')
 
   return (
     <div className="card w-practice">
       <div className="w-head">
         <div>
-          <span className="w-kicker">Bản thu</span>
-          <h2>7 ngày qua</h2>
+          <span className="w-kicker">{t('stat.recordings')}</span>
+          <h2>{t('practice.title')}</h2>
         </div>
-        <span className="w-streak" title="Số ngày liên tiếp có bản thu">Chuỗi {streak} ngày</span>
+        <span className="w-streak" title={t('practice.streakTitle')}>{t('practice.streak', { n: streak })}</span>
       </div>
       <div className="w-days">
         {days.map((x) => {
@@ -180,8 +184,8 @@ function PracticeWeek({ journal }) {
         })}
       </div>
       <p className="muted" style={{ margin: '10px 0 0' }}>
-        {week ? `${week} bản thu tuần này.` : 'Tuần này chưa thu bài nào.'}
-        {last ? ` Lần cuối: ${ago(last)}.` : ''}
+        {t('practice.week', { n: week })}
+        {last ? t('practice.last', { when: ago(last, t, locale) }) : ''}
       </p>
     </div>
   )

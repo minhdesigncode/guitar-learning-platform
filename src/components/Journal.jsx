@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadMedia, deleteMedia } from '../lib/store.js'
 import Icon from './Icon.jsx'
+import { useI18n, useT } from '../i18n/index.jsx'
+
+// Note under a recording. Older entries stored a ready-made 'Key G' text; newer ones store the key.
+export function recNote(j, t) {
+  const parts = []
+  if (j.key) parts.push(t('keyOf', { key: j.key }))
+  if (j.note) parts.push(j.note.replace(/^Key (\S+)/, (m, k) => t('keyOf', { key: k })))
+  if (j.saveFailed) parts.push(t('rec.saveFailed'))
+  return parts.join(' · ')
+}
 
 export function Media({ id, type }) {
   const [url, setUrl] = useState(null)
@@ -21,6 +31,7 @@ export function Media({ id, type }) {
 }
 
 export function Recorder({ onDone }) {
+  const t = useT()
   const [state, setState] = useState('idle')
   const [error, setError] = useState('')
   const rec = useRef(null)
@@ -42,16 +53,16 @@ export function Recorder({ onDone }) {
       rec.current = r
       setState('rec')
     } catch {
-      setError('Không mở được micro. Kiểm tra quyền micro của trình duyệt.')
+      setError(t('rec.micError'))
     }
   }
 
   return (
     <div style={{ marginTop: 12 }}>
       {state === 'idle' ? (
-        <button type="button" className="ghost rec-start" onClick={start}><Icon name="rec" />Thu âm ngay</button>
+        <button type="button" className="ghost rec-start" onClick={start}><Icon name="rec" />{t('rec.start')}</button>
       ) : (
-        <button type="button" className="rec-live" onClick={() => rec.current.stop()}><Icon name="stop" />Dừng thu</button>
+        <button type="button" className="rec-live" onClick={() => rec.current.stop()}><Icon name="stop" />{t('rec.stop')}</button>
       )}
       {error && <p className="note">{error}</p>}
     </div>
@@ -59,6 +70,7 @@ export function Recorder({ onDone }) {
 }
 
 export default function Journal({ journal, setJournal }) {
+  const { t, locale } = useI18n()
   const [filter, setFilter] = useState('')
   const [sure, setSure] = useState(null)
 
@@ -74,31 +86,31 @@ export default function Journal({ journal, setJournal }) {
   return (
     <div>
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h2>Các bản thu</h2>
+        <h2>{t('journal.title')}</h2>
         <select style={{ width: 'auto' }} value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="">Tất cả</option>
-          <option value="s">Sáng tác</option>
-          <option value="c">Cover</option>
+          <option value="">{t('all')}</option>
+          <option value="s">{t('kind.s')}</option>
+          <option value="c">{t('kind.c')}</option>
         </select>
       </div>
       {!journal.length && (
-        <p className="note">Chưa có bản thu nào. Đính kèm hoặc thu âm ngay khi thêm hay sửa bài trong <a href="#chords">Chord space</a>.</p>
+        <p className="note">{t('journal.emptyA')}<a href="#chords">{t('nav.chords')}</a>{t('journal.emptyB')}</p>
       )}
       <ul className="list" id="jlist" style={{ marginTop: 10 }}>
         {list.map((j) => (
           <li key={j.id} style={{ cursor: 'default' }}>
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <b>{j.title}</b>
-              <span className={'tag ' + (j.kind === 'c' ? 'c' : 's')}>{j.kind === 'c' ? 'Cover' : 'Sáng tác'}</span>
+              <span className={'tag ' + (j.kind === 'c' ? 'c' : 's')}>{t(j.kind === 'c' ? 'kind.c' : 'kind.s')}</span>
             </div>
             <div className="muted">
-              {new Date(j.date).toLocaleDateString('vi-VN')}
-              {j.note ? ' · ' + j.note : ''}
+              {new Date(j.date).toLocaleDateString(locale)}
+              {recNote(j, t) ? ' · ' + recNote(j, t) : ''}
             </div>
             {j.mediaType && <Media id={j.id} type={j.mediaType} />}
             <div className="row" style={{ marginTop: 8 }}>
               <button className="ghost" style={{ minHeight: 36, padding: '6px 14px' }} onClick={() => remove(j.id)}>
-                {sure === j.id ? 'Bấm lần nữa để xoá' : 'Xoá'}
+                {sure === j.id ? t('confirmDelete') : t('delete')}
               </button>
             </div>
           </li>

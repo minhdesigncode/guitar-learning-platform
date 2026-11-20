@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { mountGuitar } from '../creative/hairline.js'
 import { createPluck } from '../creative/pluck.js'
+import { useT } from '../i18n/index.jsx'
 
 // "6·E" -> { n: '6', note: 'E' }
 const parse = (r) => {
@@ -9,6 +10,7 @@ const parse = (r) => {
 }
 
 export default function CreativeSpace() {
+  const t = useT()
   const stage = useRef(null)
   const fig = useRef(null)
   const [read, setRead] = useState('rest')
@@ -19,7 +21,7 @@ export default function CreativeSpace() {
   if (!pluck.current) pluck.current = createPluck()
 
   useEffect(() => {
-    const f = mountGuitar(stage.current, { intensity, onRead: setRead })
+    const f = mountGuitar(stage.current, { intensity, onRead: setRead, label: t('cr.aria') })
     fig.current = f
     return () => {
       f.destroy()
@@ -29,6 +31,7 @@ export default function CreativeSpace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => { stage.current?.setAttribute('aria-label', t('cr.aria')) }, [t])
   useEffect(() => { fig.current?.setIntensity(intensity) }, [intensity])
   useEffect(() => { fig.current?.play(playing) }, [playing])
   useEffect(() => () => pluck.current?.close(), [])
@@ -57,28 +60,25 @@ export default function CreativeSpace() {
     <div className="creative">
       <div className="card creative-plate">
         <div className="creative-tags">
-          <span className="tag s">Vọc guitar cùng Min</span>
+          <span className="tag s">{t('cr.tag')}</span>
           <span className={'creative-read' + (s ? ' on' : '')} aria-live="polite">
-            {s ? `Dây ${s.n} · ${s.note}` : 'Đang nghỉ'}
+            {s ? t('cr.string', { n: s.n, note: s.note }) : t('cr.rest')}
           </span>
         </div>
         <div ref={stage} className="creative-stage" onPointerDown={onDown} />
       </div>
 
       <div className="card creative-side">
-        <h2>Cây đàn nét mảnh</h2>
-        <p className="muted">
-          Một cây guitar thùng nằm ngửa, vẽ bằng những nét mảnh như bản phác kỹ thuật. Rê chuột (hoặc chạm) ngang qua
-          thân đàn để quạt dây: dây nằm dưới con trỏ được kéo lên, sáng lên và kêu đúng nốt dây buông, mấy dây bên cạnh rung theo sau.
-        </p>
+        <h2>{t('cr.title')}</h2>
+        <p className="muted">{t('cr.intro')}</p>
 
         <div className="creative-now">
-          <small>Dây đang gảy</small>
+          <small>{t('cr.now')}</small>
           <b>{s ? s.note : '—'}</b>
-          <span className="muted">{s ? `Dây số ${s.n}` : 'Chưa chạm vào dây nào'}</span>
+          <span className="muted">{s ? t('cr.stringNo', { n: s.n }) : t('cr.none')}</span>
         </div>
 
-        <label htmlFor="cs-spread">Độ trễ giữa các dây</label>
+        <label htmlFor="cs-spread">{t('cr.spread')}</label>
         <input
           id="cs-spread"
           type="range"
@@ -89,28 +89,28 @@ export default function CreativeSpace() {
           onChange={(e) => setIntensity(Number(e.target.value))}
         />
         <div className="row" style={{ justifyContent: 'space-between', marginTop: 4 }}>
-          <span className="muted">Gảy cùng lúc</span>
-          <span className="muted">Rải từng dây</span>
+          <span className="muted">{t('cr.together')}</span>
+          <span className="muted">{t('cr.arpeggio')}</span>
         </div>
 
         <div className="row" style={{ marginTop: 18 }}>
           <button type="button" className={sound ? '' : 'ghost'} onClick={toggleSound} aria-pressed={sound}>
-            {sound ? 'Tiếng: bật' : 'Bật tiếng đàn'}
+            {sound ? t('cr.soundOn') : t('cr.enableSound')}
           </button>
           <button type="button" onClick={() => setPlaying((p) => !p)} aria-pressed={playing}>
-            {playing ? 'Dừng tự gảy' : 'Tự gảy thử'}
+            {playing ? t('cr.stopAuto') : t('cr.auto')}
           </button>
         </div>
         <p className="muted" style={{ margin: '8px 0 0' }}>
-          Trình duyệt chỉ cho phát tiếng sau một cú bấm: bấm “Bật tiếng đàn” hoặc chạm vào cây đàn một lần.
+          {t('cr.soundHint')}
         </p>
 
         <p className="muted creative-credit">
-          Vẽ theo phong cách và engine của{' '}
+          {t('cr.creditA')}{' '}
           <a href="https://github.com/lucasmarkes/hairline" target="_blank" rel="noopener noreferrer">
             Hairline
           </a>{' '}
-          (Lucas Marques, MIT).
+          {t('cr.creditB')}
         </p>
       </div>
     </div>

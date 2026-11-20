@@ -9,22 +9,10 @@ import CreativeSpace from './components/CreativeSpace.jsx'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS } from './lib/seed.js'
+import { useT } from './i18n/index.jsx'
 
-const VIEWS = {
-  journal: 'Trang chủ',
-  chords: 'Chord space',
-  theory: 'Nhạc lý',
-  tools: 'Beat này beat kia',
-  creative: 'Creative space',
-}
-
-const SUB = {
-  journal: 'Nhạc lý tuần này, bài mới nhất và mọi bản thu, nghe lại mình đã tiến bộ tới đâu.',
-  chords: 'Hợp âm bạn tự mò ra, đổi tông chỉ với một chạm.',
-  theory: 'Âm giai, ngũ cung, hợp âm theo key, dò key từ tai nghe.',
-  tools: 'Máy nhịp và beat trống để tập cùng.',
-  creative: 'Góc vẽ nét mảnh: một cây guitar phác bằng hair-line, rê chuột qua để gảy dây.',
-}
+// Title and subtitle of each view come from the i18n dictionaries (nav.<id>, sub.<id>).
+const VIEWS = ['journal', 'chords', 'theory', 'tools', 'creative']
 
 function Waves() {
   const colors = ['#b9d440', '#bc9bf3', '#b9d440', '#bc9bf3', '#ffffff']
@@ -48,10 +36,11 @@ function Waves() {
 
 const currentView = () => {
   const h = window.location.hash.slice(1)
-  return VIEWS[h] ? h : 'journal'
+  return VIEWS.includes(h) ? h : 'journal'
 }
 
 export default function App() {
+  const t = useT()
   const [view, setView] = useState(currentView)
   const [songs, setSongs] = useStored('sodan.songs', SEED_SONGS)
   const [journal, setJournal] = useStored('sodan.journal', [])
@@ -72,10 +61,10 @@ export default function App() {
   }, [])
 
   const stats = [
-    ['Bản thu', journal.length, 'p1'],
-    ['Sáng tác', journal.filter((j) => j.kind !== 'c').length, 'p2'],
-    ['Cover', journal.filter((j) => j.kind === 'c').length, 'p3'],
-    ['Bài trong Chord space', songs.length, 'p4'],
+    [t('stat.recordings'), journal.length, 'p1'],
+    [t('stat.originals'), journal.filter((j) => j.kind !== 'c').length, 'p2'],
+    [t('stat.covers'), journal.filter((j) => j.kind === 'c').length, 'p3'],
+    [t('stat.songs'), songs.length, 'p4'],
   ]
 
   const newSongFromProgression = (song) => {
@@ -88,12 +77,13 @@ export default function App() {
   }, [view])
 
   const addRecording = async (song, { file, kind }) => {
-    const entry = { id: uid(), songId: song.id, title: song.title, kind, note: 'Key ' + song.key, date: Date.now() }
+    // Store the key itself, not a translated label, so the note follows the current language.
+    const entry = { id: uid(), songId: song.id, title: song.title, kind, key: song.key, date: Date.now() }
     try {
       await saveMedia(entry.id, file)
       entry.mediaType = file.type || 'audio/webm'
     } catch {
-      entry.note += ' · không lưu được file, bộ nhớ trình duyệt có thể đã đầy'
+      entry.saveFailed = true
     }
     setJournal((j) => [entry, ...j])
   }
@@ -108,8 +98,8 @@ export default function App() {
       <TopNav view={view} />
       <div className="hero">
         <Waves key={view} />
-        <h1>{VIEWS[view]}</h1>
-        <p>{SUB[view]}</p>
+        <h1>{t('nav.' + view)}</h1>
+        <p>{t('sub.' + view)}</p>
       </div>
         <main>
           {view === 'journal' && (
@@ -126,7 +116,7 @@ export default function App() {
                 songs={songs}
                 journal={journal}
                 onOpenSong={openSong}
-                onNewSong={() => newSongFromProgression({ title: '', key: 'C', capo: 0, body: '# Verse 1\n[C]' })}
+                onNewSong={() => newSongFromProgression({ title: '', key: 'C', capo: 0, body: t('song.template') })}
               />
               <Journal journal={journal} setJournal={setJournal} />
             </>

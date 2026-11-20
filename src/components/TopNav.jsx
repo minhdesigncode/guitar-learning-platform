@@ -43,6 +43,18 @@ const ITEMS = [
       </>
     ),
   },
+  {
+    id: 'creative',
+    label: 'Creative space',
+    icon: (
+      <>
+        <path d="M13.5 10.5 20 4" />
+        <path d="m18.5 2.5 3 3" />
+        <path d="M10.6 8.2a3.6 3.6 0 0 0-5 1.2 3.2 3.2 0 0 0-2.3 4.4 3.4 3.4 0 0 0 1.4 4.4 3.4 3.4 0 0 0 4.4 1.4 3.2 3.2 0 0 0 4.4-2.3 3.6 3.6 0 0 0 1.2-5z" />
+        <circle cx="9.5" cy="14.5" r="1.5" />
+      </>
+    ),
+  },
 ]
 
 // Floating pill menu across the top (moves to the bottom of the screen on phones).

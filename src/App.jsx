@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import TopNav from './components/TopNav.jsx'
 import Journal from './components/Journal.jsx'
 import ChordSpace from './components/ChordSpace.jsx'
@@ -38,6 +39,7 @@ function Waves() {
           strokeWidth={i === 4 ? 3 : 10}
           strokeLinecap="round"
           opacity={i === 4 ? 0.5 : 1}
+          style={{ '--i': i }}
         />
       ))}
     </svg>
@@ -57,7 +59,14 @@ export default function App() {
   const [openId, setOpenId] = useState(null)
 
   useEffect(() => {
-    const onHash = () => setView(currentView())
+    // Tab changes run inside a view transition where the browser has one:
+    // the violet nav pill slides to the new tab and the page content crossfades.
+    const onHash = () => {
+      const next = currentView()
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!document.startViewTransition || calm) return setView(next)
+      document.startViewTransition(() => flushSync(() => setView(next)))
+    }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
@@ -98,7 +107,7 @@ export default function App() {
     <div className="app">
       <TopNav view={view} />
       <div className="hero">
-        <Waves />
+        <Waves key={view} />
         <h1>{VIEWS[view]}</h1>
         <p>{SUB[view]}</p>
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Icon from './Icon.jsx'
 
 const toBool = (s) => [...s].map((c) => c === 'x')
 const STYLES = {
@@ -8,6 +9,8 @@ const STYLES = {
   'Bossa nova': { k: 'x..xx..xx..xx..x', s: 'x..x..x...x..x..', h: 'x.x.x.x.x.x.x.x.' },
   'Máy nhịp': { k: 'x...............', s: '....x...x...x...', h: '................' },
 }
+const HIT = { k: 'trống bass', s: 'snare', h: 'hi-hat', '': 'nghỉ' }
+const MARK = { k: 'B', s: 'S', h: 'H', '': '' }
 const load = (name) => {
   const p = STYLES[name]
   return { k: toBool(p.k), s: toBool(p.s), h: toBool(p.h) }
@@ -112,15 +115,21 @@ function BeatMachine() {
           <label htmlFor="bb">Tempo: {bpm} bpm</label>
           <input id="bb" type="range" min="50" max="180" value={bpm} onChange={(e) => setBpm(+e.target.value)} />
         </div>
-        <button className="pick" style={{ alignSelf: 'end' }} onClick={toggle}>{playing ? '■ Dừng' : '▶ Chạy beat'}</button>
+        <button className="pick" style={{ alignSelf: 'end' }} onClick={toggle}>{playing ? <><Icon name="stop" />Dừng</> : <><Icon name="play" />Chạy beat</>}</button>
       </div>
-      <div className="steps">
-        {[...Array(16)].map((_, i) => (
-          <span key={i} onClick={() => cycle(i)}
-            className={(pat.k[i] ? 'k' : pat.s[i] ? 's' : pat.h[i] ? 'h' : '') + (playing && i === now ? ' now' : '')} />
-        ))}
+      <div className="steps" role="group" aria-label="16 nhịp của beat">
+        {[...Array(16)].map((_, i) => {
+          const t = pat.k[i] ? 'k' : pat.s[i] ? 's' : pat.h[i] ? 'h' : ''
+          return (
+            <button key={i} type="button" onClick={() => cycle(i)}
+              aria-label={`Nhịp ${i + 1}: ${HIT[t]}`}
+              className={t + (playing && i === now ? ' now' : '')}>
+              {MARK[t]}
+            </button>
+          )
+        })}
       </div>
-      <p className="muted" style={{ marginTop: 8 }}>Tím: trống bass · Tím nhạt: snare · Xanh chanh: hi-hat. Chạm vào ô để đổi.</p>
+      <p className="muted" style={{ marginTop: 8 }}>B (tím): trống bass · S (tím nhạt): snare · H (xanh chanh): hi-hat. Chạm vào ô để đổi.</p>
     </div>
   )
 }

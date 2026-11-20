@@ -1,0 +1,77 @@
+/* Polish + motion pass (Impeccable critique/audit/polish/animate, Nov 2026).
+   Motion thesis: the hero lines are guitar strings. Each tab change plucks them once,
+   the violet nav pill slides to the new tab, and the page crossfades. Everything else is
+   quiet feedback: presses, hovers, the beat grid lighting up. */
+:root{--ease-out:cubic-bezier(.16,1,.3,1)}
+
+/* browser surfaces carry the palette too */
+::selection{background:var(--lilac);color:var(--deep)}
+html{scrollbar-color:color-mix(in srgb,var(--violet) 45%,transparent) transparent;caret-color:var(--violet2);accent-color:var(--violet)}
+a{color:var(--violet2);text-underline-offset:3px;text-decoration-thickness:1.5px}
+a:focus-visible{outline:3px solid var(--lime);outline-offset:2px;border-radius:6px}
+
+/* icons in buttons */
+.ico{width:16px;height:16px;fill:currentColor;flex:none}
+button:has(>.ico){display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.rec-start .ico{fill:#e5484d}
+.rec-live .ico{animation:rec-blink 1.2s ease-in-out infinite}
+@keyframes rec-blink{50%{opacity:.35}}
+
+/* press + hover feedback */
+button,.w-row,nav.pills a,.list li{transition:background-color .18s var(--ease-out),color .18s var(--ease-out),border-color .18s var(--ease-out),transform .12s var(--ease-out),opacity .18s}
+button:active:not(:disabled),.w-row:active{transform:scale(.97)}
+button:disabled{cursor:not-allowed}
+
+/* nav: labels never disappear; phones and tablets get short ones */
+nav.pills a em{display:none;font-style:normal}
+nav.pills a.on{view-transition-name:nav-pill}
+@media(max-width:900px){
+  nav.pills a em{display:block;font-size:13px;font-weight:600}}
+@media(max-width:640px){
+  nav.pills a{flex-direction:column;gap:2px;padding:7px 12px;min-height:52px;justify-content:center}
+  nav.pills a em{font-size:11px;line-height:1.1}}
+
+/* hero: the strings */
+.hero svg.waves path{transform-box:fill-box;transform-origin:center;animation:pluck .95s var(--ease-out) calc(var(--i) * 45ms) both}
+@keyframes pluck{
+  0%{transform:translateY(0)}12%{transform:translateY(-7px)}26%{transform:translateY(5px)}
+  42%{transform:translateY(-3px)}60%{transform:translateY(1.5px)}100%{transform:translateY(0)}}
+@media(max-width:640px){
+  .hero{padding-bottom:64px}
+  .hero svg.waves{top:auto;bottom:-4px;height:58px;width:100%;right:0;opacity:.9}}
+
+/* tab change: pill slides, content crossfades and settles */
+::view-transition-group(nav-pill){animation-duration:.38s;animation-timing-function:var(--ease-out)}
+.topnav{view-transition-name:topnav}
+/* a view-transition name makes the header its own stacking layer; lift it so the fixed phone tab bar stays above the page */
+@media(max-width:640px){.topnav{position:relative;z-index:20}}
+main{view-transition-name:page}
+::view-transition-old(root),::view-transition-old(page){animation:.14s ease-in both vt-out}
+::view-transition-new(root){animation:.24s var(--ease-out) both vt-fade}
+::view-transition-new(page){animation:.34s var(--ease-out) both vt-in}
+@keyframes vt-fade{from{opacity:0}}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0;transform:translateY(8px)}}
+
+/* beat grid: real buttons, marked by letter as well as colour */
+.steps button{all:unset;box-sizing:border-box;height:32px;border-radius:10px;background:var(--soft);cursor:pointer;display:grid;place-items:center;
+  font:700 11px Poppins,sans-serif;color:var(--deep);transition:background-color .15s,transform .08s var(--ease-out)}
+.steps button.k{background:var(--violet);color:#fff}.steps button.s{background:var(--lilac)}.steps button.h{background:var(--lime)}
+.steps button:hover:not(.k,.s,.h){background:var(--line)}
+.steps button:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.steps button.now{outline:3px solid var(--ink);outline-offset:1px;transform:scale(1.08)}
+.steps button.now:not(.k,.s,.h){background:var(--line)}
+
+/* metronome: the downbeat lands harder */
+.w-beats span{transition:transform .1s var(--ease-out),background-color .1s}
+.w-beats span:first-child.now{transform:scale(1.3)}
+
+/* reduced motion: keep colour and state changes, drop movement */
+@media (prefers-reduced-motion:reduce){
+  .hero svg.waves path{animation:none}
+  button:active:not(:disabled),.w-row:active,.steps button.now,.w-beats span.now,.w-beats span:first-child.now{transform:none}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none}
+  .rec-live .ico{animation-duration:2.4s}}
+
+/* phones: the 16 steps wrap to two bars of 8 so each one is a real tap target */
+@media(max-width:640px){.steps{grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}.steps button{height:40px;font-size:12px}}

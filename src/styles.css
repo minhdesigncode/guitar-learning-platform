@@ -105,13 +105,8 @@ label{display:block;font-size:13.5px;font-weight:500;margin:12px 0 4px;color:var
 .links a:nth-child(3n+2){background:var(--lilac);color:var(--deep)}.links a:nth-child(3n+2) .muted{color:#4a3d7a}
 .links a b{display:block;font-size:17px;font-weight:700}
 .steps{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:5px;margin-top:14px}
-.steps span{height:32px;border-radius:10px;background:var(--soft);cursor:pointer}
-.steps span.k{background:var(--violet)}.steps span.s{background:var(--lilac)}.steps span.h{background:var(--lime)}
-.steps span.now{outline:3px solid var(--ink);outline-offset:1px}
 .note{min-height:1.4em;font-size:14px;color:var(--mute)}
 audio,video{width:100%;margin-top:10px;border-radius:14px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-
 /* creative space: a hair-line figure on a white plate */
 .creative{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:22px;align-items:start}
 @media(max-width:900px){.creative{grid-template-columns:minmax(0,1fr)}}

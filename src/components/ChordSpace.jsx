@@ -1,31 +1,119 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { transposeBody, transposeKey } from '../lib/music.js'
 import { uid } from '../lib/store.js'
 
-function Sheet({ body }) {
+// Split the body into sections (a # heading starts a new one) so columns never cut a heading off its lines.
+function sections(body) {
+  const out = [[]]
+  body.split('\n').forEach((line) => {
+    if (/^\s*#/.test(line) && out[out.length - 1].length) out.push([])
+    out[out.length - 1].push(line)
+  })
+  return out
+}
+
+function Line({ line }) {
+  if (/^\s*#/.test(line)) return <div className="sec">{line.replace(/^\s*#+\s*/, '')}</div>
+  if (!line.trim()) return <div className="ln">&nbsp;</div>
+  if (!line.includes('[')) return <div className="ln">{line}</div>
+  const parts = line.split(/\[([^\]]+)\]/)
+  const segs = []
+  if (parts[0]) segs.push(['', parts[0]])
+  for (let p = 1; p < parts.length; p += 2) segs.push([parts[p], parts[p + 1] || ' '])
   return (
-    <div className="sheet scroll">
-      {body.split('\n').map((line, i) => {
-        if (/^\s*#/.test(line)) return <div key={i} className="sec">{line.replace(/^\s*#+\s*/, '')}</div>
-        if (!line.trim()) return <div key={i} className="ln">&nbsp;</div>
-        if (!line.includes('[')) return <div key={i} className="ln">{line}</div>
-        const parts = line.split(/\[([^\]]+)\]/)
-        const segs = []
-        if (parts[0]) segs.push(['', parts[0]])
-        for (let p = 1; p < parts.length; p += 2) segs.push([parts[p], parts[p + 1] || ' '])
-        return (
-          <div key={i} className="ln">
-            {segs.map(([c, t], j) => (
-              <span key={j} className="sg">
-                <i>{c}</i>
-                {t}
-              </span>
-            ))}
-          </div>
-        )
-      })}
+    <div className="ln">
+      {segs.map(([c, t], j) => (
+        <span key={j} className="sg">
+          <i>{c}</i>
+          {t}
+        </span>
+      ))}
     </div>
   )
+}
+
+const Sheet = forwardRef(function Sheet({ body, zoom, cols }, ref) {
+  return (
+    <div ref={ref} className="sheet" style={{ '--z': zoom, columnCount: cols }}>
+      {sections(body).map((sec, i) => (
+        <div key={i} className="blk">
+          {sec.map((line, j) => <Line key={j} line={line} />)}
+        </div>
+      ))}
+    </div>
+  )
+})
+
+const ZMIN = 0.5
+const ZMAX = 1.8
+const clampZ = (z) => Math.round(Math.min(ZMAX, Math.max(ZMIN, z)) * 100) / 100
+
+const Mag = ({ plus }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="10.5" cy="10.5" r="6.5" />
+    <path d="M15.5 15.5 21 21M7.5 10.5h6" />
+    {plus && <path d="M10.5 7.5v6" />}
+  </svg>
+)
+
+function useView() {
+  const [v, setV] = useState(() => {
+    try {
+      return { zoom: 1, cols: 1, fit: false, wide: false, ...JSON.parse(localStorage.getItem('sodan.view') || '{}') }
+    } catch {
+      return { zoom: 1, cols: 1, fit: false, wide: false }
+    }
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem('sodan.view', JSON.stringify(v))
+    } catch {
+      /* ignore */
+    }
+  }, [v])
+  const update = useCallback(
+    (patch) => setV((old) => (Object.keys(patch).every((k) => old[k] === patch[k]) ? old : { ...old, ...patch })),
+    []
+  )
+  return [v, update]
+}
+
+// Find the biggest zoom (and column count) at which the whole sheet fits below the toolbar.
+function fitSheet(el, bar) {
+  if (!el || !bar) return null
+  const nav = document.querySelector('.topnav')
+  const navBottom = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + 14 : 0
+  const gap = el.getBoundingClientRect().top - bar.getBoundingClientRect().top
+  const avail = window.innerHeight - navBottom - 12 - gap - 16
+  const width = el.clientWidth
+  const keep = { z: el.style.getPropertyValue('--z'), c: el.style.columnCount }
+  const heightAt = (z, c) => {
+    el.style.setProperty('--z', z)
+    el.style.columnCount = c
+    return el.scrollHeight
+  }
+  let best = null
+  for (let c = 1; c <= 3; c++) {
+    let lo = ZMIN
+    let hi = 1.4
+    if (c > 1 && width / c < 250 * lo) break
+    if (heightAt(lo, c) > avail) {
+      if (!best) best = { zoom: lo, cols: c }
+      continue
+    }
+    for (let k = 0; k < 8; k++) {
+      const mid = (lo + hi) / 2
+      const fits = heightAt(mid, c) <= avail && (c === 1 || width / c >= 250 * mid)
+      if (fits) lo = mid
+      else hi = mid
+    }
+    const z = Math.floor(lo * 20) / 20
+    // An extra column must buy at least 10% more text size to be worth it.
+    if (!best || z > best.zoom * 1.1) best = { zoom: z, cols: c }
+  }
+  el.style.setProperty('--z', keep.z)
+  el.style.columnCount = keep.c
+  return best
 }
 
 function Editor({ song, onSave, onCancel }) {
@@ -73,6 +161,9 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
   const [offset, setOffset] = useState(0)
   const [q, setQ] = useState('')
   const [sure, setSure] = useState(false)
+  const [v, setView] = useView()
+  const sheetRef = useRef(null)
+  const barRef = useRef(null)
 
   useEffect(() => {
     if (draft) {
@@ -98,9 +189,38 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
 
   const shift = (d) => setOffset((o) => (Math.abs(o + d) > 11 ? 0 : o + d))
   const view = cur ? transposeKey(cur.key || 'C', offset) : null
+  const body = cur ? transposeBody(cur.body || '', offset, view.flat) : ''
+
+  const refit = useCallback(() => {
+    const r = fitSheet(sheetRef.current, barRef.current)
+    if (r) setView(r)
+  }, [setView])
+
+  // In fit mode, refit whenever the song, key, layout or window size changes.
+  useLayoutEffect(() => {
+    if (v.fit && !editing) refit()
+  }, [v.fit, v.wide, body, editing, refit])
+  useEffect(() => {
+    if (!v.fit) return
+    const on = () => refit()
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [v.fit, refit])
+
+  const zoomBy = (d) => setView({ fit: false, zoom: clampZ(v.zoom + d) })
+  const fitNow = () => {
+    const bar = barRef.current
+    const nav = document.querySelector('.topnav')
+    if (bar) {
+      const navH = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + 14 : 0
+      window.scrollTo({ top: bar.getBoundingClientRect().top + window.scrollY - navH - 12 })
+    }
+    if (v.fit) refit()
+    else setView({ fit: true })
+  }
 
   return (
-    <div className="grid">
+    <div className={v.wide && cur && !editing ? 'grid solo' : 'grid'}>
       <div className="card">
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <h2>Bài của bạn</h2>
@@ -151,7 +271,32 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft }) {
               {offset !== 0 && `Đã ${offset > 0 ? 'nâng' : 'hạ'} ${Math.abs(offset) / 2} cung từ ${cur.key}. `}
               {cur.capo ? `Capo ${cur.capo}.` : ''}
             </p>
-            <Sheet body={transposeBody(cur.body || '', offset, view.flat)} />
+            <div ref={barRef} className="zoombar" role="toolbar" aria-label="Cỡ chữ và bố cục lời">
+              <div className="seg">
+                <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label="Thu nhỏ chữ" title="Thu nhỏ">
+                  <Mag />
+                </button>
+                <button className="ghost pct" onClick={() => setView({ fit: false, zoom: 1 })} title="Về 100%">
+                  {Math.round(v.zoom * 100)}%
+                </button>
+                <button className="ghost icon" onClick={() => zoomBy(0.1)} disabled={v.zoom >= ZMAX} aria-label="Phóng to chữ" title="Phóng to">
+                  <Mag plus />
+                </button>
+              </div>
+              <button className={v.fit ? 'pick' : 'ghost'} onClick={fitNow} aria-pressed={v.fit} title="Tự co chữ và chia cột để thấy trọn bài">
+                Vừa màn hình
+              </button>
+              <div className="seg" role="group" aria-label="Số cột">
+                {[1, 2, 3].map((n) => (
+                  <button key={n} className={v.cols === n ? 'pick' : 'ghost'} aria-pressed={v.cols === n}
+                    onClick={() => setView({ fit: false, cols: n })}>{n} cột</button>
+                ))}
+              </div>
+              <button className="ghost" onClick={() => setView({ wide: !v.wide })} aria-pressed={v.wide}>
+                {v.wide ? 'Hiện danh sách' : 'Ẩn danh sách'}
+              </button>
+            </div>
+            <Sheet ref={sheetRef} body={body} zoom={v.zoom} cols={v.cols} />
             <div className="row" style={{ marginTop: 16 }}>
               <button className="ghost" onClick={() => {
                 if (!sure) return setSure(true)

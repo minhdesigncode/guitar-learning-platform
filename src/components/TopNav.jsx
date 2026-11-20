@@ -1,7 +1,8 @@
+import { useI18n } from '../i18n/index.jsx'
+
 const ITEMS = [
   {
     id: 'journal',
-    label: 'Trang chủ',
     icon: (
       <>
         <rect x="4" y="3" width="16" height="18" rx="3" />
@@ -13,7 +14,6 @@ const ITEMS = [
   },
   {
     id: 'chords',
-    label: 'Chord space',
     icon: (
       <>
         <path d="M2 6h20M2 10h20M2 14h20M2 18h20" />
@@ -24,7 +24,6 @@ const ITEMS = [
   },
   {
     id: 'theory',
-    label: 'Nhạc lý',
     icon: (
       <>
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" />
@@ -34,7 +33,6 @@ const ITEMS = [
   },
   {
     id: 'tools',
-    label: 'Beat này beat kia',
     icon: (
       <>
         <circle cx="12" cy="12" r="8" />
@@ -45,7 +43,6 @@ const ITEMS = [
   },
   {
     id: 'creative',
-    label: 'Creative space',
     icon: (
       <>
         <path d="M13.5 10.5 20 4" />
@@ -57,11 +54,10 @@ const ITEMS = [
   },
 ]
 
-// Shorter names for the phone tab bar, where every item shows its label under the icon.
-const SHORT = { chords: 'Chord', tools: 'Beat', creative: 'Sáng tạo' }
-
 // Floating pill menu across the top (moves to the bottom of the screen on phones).
 export default function TopNav({ view }) {
+  const { t, lang, setLang } = useI18n()
+  const other = lang === 'vi' ? 'en' : 'vi'
   return (
     <header className="topnav">
       <a className="brand" href="#journal">
@@ -76,15 +72,21 @@ export default function TopNav({ view }) {
       </a>
       <nav className="pills">
         {ITEMS.map((it) => (
-          <a key={it.id} href={'#' + it.id} title={it.label} aria-label={it.label} className={view === it.id ? 'on' : ''}
+          <a key={it.id} href={'#' + it.id} title={t('nav.' + it.id)} aria-label={t('nav.' + it.id)} className={view === it.id ? 'on' : ''}
             aria-current={view === it.id ? 'page' : undefined}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>
-            <span>{it.label}</span>
-            <em aria-hidden="true">{SHORT[it.id] || it.label}</em>
+            <span>{t('nav.' + it.id)}</span>
+            {/* Shorter name for the phone tab bar, where every item shows its label under the icon. */}
+            <em aria-hidden="true">{t('navShort.' + it.id)}</em>
           </a>
         ))}
       </nav>
-      <span className="dot" aria-hidden="true">M</span>
+      <div className="nav-end">
+        <button type="button" className="lang" onClick={() => setLang(other)} title={t('lang.switch')} aria-label={t('lang.switch')}>
+          {t('lang.short')}
+        </button>
+        <span className="dot" aria-hidden="true">M</span>
+      </div>
     </header>
   )
 }

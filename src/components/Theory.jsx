@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { KEYS, SCALES, PROGRESSIONS, FLAT_KEYS, pc, noteName, chordsOf, progressionIn, detectKey } from '../lib/music.js'
+import { useT } from '../i18n/index.jsx'
 
 const TUNING = [4, 11, 7, 2, 9, 4] // high E to low E
 
@@ -53,6 +54,7 @@ function Fretboard({ root, scale, flat }) {
 }
 
 export default function Theory({ onCreateSong }) {
+  const t = useT()
   const [key, setKey] = useState('G')
   const [si, setSi] = useState(0)
   const [pi, setPi] = useState(1)
@@ -60,32 +62,32 @@ export default function Theory({ onCreateSong }) {
   const scale = SCALES[si]
   const root = pc(key)
   const flat = FLAT_KEYS.includes(key)
-  const prog = progressionIn(root, flat, PROGRESSIONS[pi][0])
+  const prog = progressionIn(root, flat, PROGRESSIONS[pi])
   const found = detectKey(dq)
 
   return (
     <section>
       <div className="row">
         <div style={{ flex: '1 1 140px' }}>
-          <label htmlFor="tk">Key</label>
+          <label htmlFor="tk">{t('key')}</label>
           <select id="tk" value={key} onChange={(e) => setKey(e.target.value)}>
             {KEYS.map((k) => <option key={k}>{k}</option>)}
           </select>
         </div>
         <div style={{ flex: '2 1 220px' }}>
-          <label htmlFor="ts">Âm giai</label>
+          <label htmlFor="ts">{t('scale')}</label>
           <select id="ts" value={si} onChange={(e) => setSi(+e.target.value)}>
-            {SCALES.map((s, i) => <option key={i} value={i}>{s.name}</option>)}
+            {SCALES.map((s, i) => <option key={i} value={i}>{t('scale.' + s.id)}</option>)}
           </select>
         </div>
       </div>
       <p className="big" style={{ margin: '20px 0 4px' }}>{scale.iv.map((i) => noteName(root + i, flat)).join(' · ')}</p>
-      <p className="muted">{scale.desc}</p>
+      <p className="muted">{t(`scale.${scale.id}.desc`)}</p>
       <div className="scroll card" style={{ marginTop: 12, padding: 10 }}>
         <div style={{ minWidth: 640 }}><Fretboard root={root} scale={scale} flat={flat} /></div>
       </div>
 
-      <h3 style={{ marginTop: 28 }}>Hợp âm trong key</h3>
+      <h3 style={{ marginTop: 28 }}>{t('theory.chordsInKey')}</h3>
       <div className="chips" style={{ marginTop: 10 }}>
         {chordsOf(root, flat, scale.minor).map((c) => (
           <div key={c.roman} className="chip"><b>{c.chord}</b><small>{c.roman}</small></div>
@@ -94,34 +96,34 @@ export default function Theory({ onCreateSong }) {
 
       <div className="grid" style={{ marginTop: 28 }}>
         <div className="card">
-          <h3>Vòng hợp âm gợi ý</h3>
+          <h3>{t('theory.progTitle')}</h3>
           <p className="big" style={{ fontSize: 28, margin: '10px 0' }}>{prog.join(' – ')}</p>
-          <p className="muted">{PROGRESSIONS[pi][1]} ({PROGRESSIONS[pi][0]}, key {noteName(root, flat)} trưởng)</p>
+          <p className="muted">{t('theory.progMeta', { desc: t('prog.' + PROGRESSIONS[pi]), roman: PROGRESSIONS[pi], key: noteName(root, flat) })}</p>
           <div className="row">
-            <button className="ghost" onClick={() => setPi((pi + 1) % PROGRESSIONS.length)}>Vòng khác</button>
+            <button className="ghost" onClick={() => setPi((pi + 1) % PROGRESSIONS.length)}>{t('theory.another')}</button>
             <button className="pick" onClick={() => onCreateSong({
-              title: 'Ý tưởng mới — ' + PROGRESSIONS[pi][0],
+              title: t('theory.newIdea', { roman: PROGRESSIONS[pi] }),
               key: noteName(root, flat),
               capo: 0,
-              body: '# Verse 1\n' + prog.map((c) => '[' + c + ']').join('     ') + '\n\n# Chorus\n',
-            })}>Tạo bài từ vòng này</button>
+              body: t('theory.songBody', { chords: prog.map((c) => '[' + c + ']').join('     ') }),
+            })}>{t('theory.create')}</button>
           </div>
         </div>
         <div className="card">
-          <h3>Dò key từ hợp âm</h3>
-          <p className="muted">Nhập các hợp âm bạn mò được, cách nhau bằng dấu cách.</p>
-          <input value={dq} onChange={(e) => setDq(e.target.value)} placeholder="Ví dụ: G Em C D B7" />
+          <h3>{t('theory.detect')}</h3>
+          <p className="muted">{t('theory.detectHelp')}</p>
+          <input value={dq} onChange={(e) => setDq(e.target.value)} placeholder={t('theory.detectPh')} />
           <div style={{ marginTop: 12 }}>
             {found.map((x, i) => {
               const f = FLAT_KEYS.includes(noteName(x.k, true))
               return (
                 <div key={x.k} className="row" style={{ justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--line)' }}>
-                  <span><b>{i ? '' : '★ '}{noteName(x.k, f)} trưởng</b> <span className="muted">/ {noteName(x.k + 9, f)} thứ</span></span>
-                  <span className="muted">{x.pct}% khớp</span>
+                  <span><b>{i ? '' : '★ '}{t('majorKey', { k: noteName(x.k, f) })}</b> <span className="muted">/ {t('minorKey', { k: noteName(x.k + 9, f) })}</span></span>
+                  <span className="muted">{t('theory.match', { pct: x.pct })}</span>
                 </div>
               )
             })}
-            {found.length > 0 && <p className="muted">Hợp âm trưởng có 7 (như B7, E7) thường là hợp âm “mượn” dẫn về bậc vi hoặc iii.</p>}
+            {found.length > 0 && <p className="muted">{t('theory.borrowed')}</p>}
           </div>
         </div>
       </div>

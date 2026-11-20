@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '../i18n/index.jsx'
 import Icon from './Icon.jsx'
 
 const toBool = (s) => [...s].map((c) => c === 'x')
+// Style names: i18n keys style.<id>
 const STYLES = {
-  Rock: { k: 'x.......x.x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.' },
-  'Ballad 6/8 cảm': { k: 'x.....x.........', s: '........x.......', h: 'x.x.x.x.x.x.x.x.' },
-  Pop: { k: 'x......x..x.....', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx' },
-  'Bossa nova': { k: 'x..xx..xx..xx..x', s: 'x..x..x...x..x..', h: 'x.x.x.x.x.x.x.x.' },
-  'Máy nhịp': { k: 'x...............', s: '....x...x...x...', h: '................' },
+  rock: { k: 'x.......x.x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.' },
+  ballad: { k: 'x.....x.........', s: '........x.......', h: 'x.x.x.x.x.x.x.x.' },
+  pop: { k: 'x......x..x.....', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx' },
+  bossa: { k: 'x..xx..xx..xx..x', s: 'x..x..x...x..x..', h: 'x.x.x.x.x.x.x.x.' },
+  click: { k: 'x...............', s: '....x...x...x...', h: '................' },
 }
-const HIT = { k: 'trống bass', s: 'snare', h: 'hi-hat', '': 'nghỉ' }
 const MARK = { k: 'B', s: 'S', h: 'H', '': '' }
 const load = (name) => {
   const p = STYLES[name]
@@ -17,8 +18,9 @@ const load = (name) => {
 }
 
 function BeatMachine() {
-  const [style, setStyle] = useState('Rock')
-  const [pat, setPat] = useState(() => load('Rock'))
+  const t = useT()
+  const [style, setStyle] = useState('rock')
+  const [pat, setPat] = useState(() => load('rock'))
   const [bpm, setBpm] = useState(88)
   const [playing, setPlaying] = useState(false)
   const [now, setNow] = useState(-1)
@@ -103,33 +105,33 @@ function BeatMachine() {
 
   return (
     <div className="card">
-      <h2>Máy nhịp &amp; beat</h2>
+      <h2>{t('beat.title')}</h2>
       <div className="row" style={{ marginTop: 12 }}>
         <div style={{ flex: '1 1 160px' }}>
-          <label htmlFor="bs">Điệu</label>
+          <label htmlFor="bs">{t('beat.style')}</label>
           <select id="bs" value={style} onChange={(e) => { setStyle(e.target.value); setPat(load(e.target.value)) }}>
-            {Object.keys(STYLES).map((k) => <option key={k}>{k}</option>)}
+            {Object.keys(STYLES).map((k) => <option key={k} value={k}>{t('style.' + k)}</option>)}
           </select>
         </div>
         <div style={{ flex: '2 1 220px' }}>
-          <label htmlFor="bb">Tempo: {bpm} bpm</label>
+          <label htmlFor="bb">{t('beat.tempo', { bpm })}</label>
           <input id="bb" type="range" min="50" max="180" value={bpm} onChange={(e) => setBpm(+e.target.value)} />
         </div>
-        <button className="pick" style={{ alignSelf: 'end' }} onClick={toggle}>{playing ? <><Icon name="stop" />Dừng</> : <><Icon name="play" />Chạy beat</>}</button>
+        <button className="pick" style={{ alignSelf: 'end' }} onClick={toggle}>{playing ? <><Icon name="stop" />{t('stop')}</> : <><Icon name="play" />{t('beat.play')}</>}</button>
       </div>
-      <div className="steps" role="group" aria-label="16 nhịp của beat">
+      <div className="steps" role="group" aria-label={t('beat.steps')}>
         {[...Array(16)].map((_, i) => {
-          const t = pat.k[i] ? 'k' : pat.s[i] ? 's' : pat.h[i] ? 'h' : ''
+          const hit = pat.k[i] ? 'k' : pat.s[i] ? 's' : pat.h[i] ? 'h' : ''
           return (
             <button key={i} type="button" onClick={() => cycle(i)}
-              aria-label={`Nhịp ${i + 1}: ${HIT[t]}`}
-              className={t + (playing && i === now ? ' now' : '')}>
-              {MARK[t]}
+              aria-label={t('beat.step', { n: i + 1, hit: t('hit.' + (hit || 'rest')) })}
+              className={hit + (playing && i === now ? ' now' : '')}>
+              {MARK[hit]}
             </button>
           )
         })}
       </div>
-      <p className="muted" style={{ marginTop: 8 }}>B (tím): trống bass · S (tím nhạt): snare · H (xanh chanh): hi-hat. Chạm vào ô để đổi.</p>
+      <p className="muted" style={{ marginTop: 8 }}>{t('beat.legend')}</p>
     </div>
   )
 }

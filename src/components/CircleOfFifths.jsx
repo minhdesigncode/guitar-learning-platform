@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { KEYS, FLAT_KEYS, pc, noteName } from '../lib/music.js'
+import { useT } from '../i18n/index.jsx'
 
 // Circle of fifths: position i holds the major key KEYS[i] (outer ring)
 // and its relative minor (inner ring). Each lesson highlights a window of
-// positions, given as offsets from the chosen key.
+// positions, given as offsets from the chosen key. Titles and texts live in
+// the i18n dictionaries under lesson.<id>.*
 const ENH = { 5: 'Cb', 6: 'Gb', 7: 'C#' }
 const ENH_MINOR = { 6: 'Ebm', 7: 'A#m' }
 const mod = (n, m = 12) => ((n % m) + m) % m
@@ -11,22 +13,16 @@ const mod = (n, m = 12) => ((n % m) + m) % m
 const LESSONS = [
   {
     id: 'penta',
-    title: 'Ngũ cung là 5 ô liền kề',
-    hook: 'Bạn có biết âm giai ngũ cung chính là 5 ô liền nhau trên vòng quãng năm?',
     outer: [0, 1, 2, 3, 4],
     inner: [],
   },
   {
     id: 'major',
-    title: 'Âm giai trưởng là 7 ô liền kề',
-    hook: 'Lấy 7 ô liền nhau, bắt đầu từ ô bên trái key, là đủ 7 nốt của âm giai trưởng.',
     outer: [-1, 0, 1, 2, 3, 4, 5],
     inner: [],
   },
   {
     id: 'chords',
-    title: '6 hợp âm quen trong một key',
-    hook: 'Key ở giữa, hai ô hai bên ở vòng ngoài và ba ô ngay bên dưới: đó là 6 hợp âm dùng nhiều nhất của key.',
     outer: [-1, 0, 1],
     inner: [-1, 0, 1],
   },
@@ -57,7 +53,7 @@ const sector = (r1, r2, i) => {
 const majorPc = (i) => pc(KEYS[mod(i)])
 const minorName = (i, flat) => noteName(majorPc(i) + 9, flat) + 'm'
 
-function lessonInfo(lesson, pos, minor) {
+function lessonInfo(lesson, pos, minor, tr) {
   const flat = FLAT_KEYS.includes(KEYS[pos])
   const n = (p) => noteName(p, flat)
   const tonicPc = minor ? majorPc(pos) + 9 : majorPc(pos)
@@ -71,15 +67,8 @@ function lessonInfo(lesson, pos, minor) {
     const maj = sortFrom(pcs, majorPc(pos)).map(n).join(' ')
     const min = sortFrom(pcs, majorPc(pos) + 9).map(n).join(' ')
     return {
-      name: minor ? `${t} ngũ cung` : `${T} ngũ cung trưởng`,
+      ...tr('lesson.penta', { minor, T, t, mroot: n(majorPc(pos) + 9), min, maj, left: KEYS[mod(pos - 1)], right: KEYS[mod(pos + 5)] }),
       notes: sortFrom(pcs, tonicPc).map(n),
-      body: [
-        `Từ ô ${T}, đi tiếp 4 bước theo chiều kim đồng hồ. Mỗi bước là một quãng năm, gom 5 nốt lại là được âm giai ngũ cung.`,
-        minor
-          ? `Cùng 5 nốt đó, bắt đầu từ ${n(majorPc(pos) + 9)} là ${t} ngũ cung (${min}), hộp solo rock và blues quen thuộc. Bắt đầu từ ${T} là ${T} ngũ cung trưởng (${maj}).`
-          : `Cùng 5 nốt đó, bắt đầu từ ${n(majorPc(pos) + 9)} là ${t} ngũ cung (${min}), hộp solo rock và blues quen thuộc.`,
-        `Ngũ cung không có quãng nửa cung nào, nên ứng tác gần như không thể sai. Thêm ô ${KEYS[mod(pos - 1)]} bên trái và ô ${KEYS[mod(pos + 5)]} là đủ 7 nốt của âm giai trưởng.`,
-      ],
     }
   }
   if (lesson.id === 'major') {
@@ -88,15 +77,8 @@ function lessonInfo(lesson, pos, minor) {
     const out = n(majorPc(pos - 1))
     const inn = noteName(majorPc(pos + 6), FLAT_KEYS.includes(next))
     return {
-      name: minor ? `${t} tự nhiên` : `${T} trưởng`,
+      ...tr('lesson.major', { minor, T, t, mroot: n(majorPc(pos) + 9), from: KEYS[mod(pos - 1)], to: KEYS[mod(pos + 5)], next, out, inn }),
       notes: sortFrom(pcs, tonicPc).map(n),
-      body: [
-        `7 ô liền kề từ ${KEYS[mod(pos - 1)]} tới ${KEYS[mod(pos + 5)]} cho ra đủ 7 nốt của ${T} trưởng. Nốt chủ luôn nằm ở ô thứ hai.`,
-        minor
-          ? `${t} tự nhiên dùng đúng 7 nốt đó, chỉ là bắt đầu từ ${n(majorPc(pos) + 9)}. Vì vậy ${t} được gọi là giọng thứ “song song” của ${T}.`
-          : `Đó cũng là 7 nốt của ${t} tự nhiên, giọng thứ nằm ngay bên dưới ${T}.`,
-        `Hai key cạnh nhau chỉ khác đúng một nốt: sang ${next} thì ${out} được thay bằng ${inn}. Vì vậy chuyển sang key bên cạnh nghe rất êm.`,
-      ],
     }
   }
   const outer = [['IV', -1], ['I', 0], ['V', 1]].map(([r, o]) => ({ r, c: KEYS[mod(pos + o)], big: true }))
@@ -105,18 +87,21 @@ function lessonInfo(lesson, pos, minor) {
     ? [{ r: 'i', c: t, big: true }, { r: 'iv', c: inner[0].c }, { r: 'v', c: inner[2].c }, { r: 'III', c: T }, { r: 'VI', c: outer[0].c }, { r: 'VII', c: outer[2].c }]
     : [...outer, ...inner]
   return {
-    name: minor ? `Key ${t}` : `Key ${T} trưởng`,
+    ...tr('lesson.chords', {
+      minor,
+      T,
+      t,
+      outer: outer.map((x) => x.c).join(', '),
+      inner: inner.map((x) => x.c).join(', '),
+      dim: n(majorPc(pos) + 11) + 'dim',
+      ex: `${outer[1].c} ${outer[2].c} ${inner[1].c} ${outer[0].c}`,
+    }),
     chords: all,
-    body: [
-      ...(minor ? [`${t} dùng chung 6 hợp âm với ${T} trưởng, chỉ là lấy ${t} làm nhà.`] : []),
-      `Vòng ngoài: ${outer.map((x) => x.c).join(', ')} là ba hợp âm trưởng I, IV, V. Vòng trong: ${inner.map((x) => x.c).join(', ')} là ba hợp âm thứ ii, vi, iii.`,
-      `Hợp âm thứ 7 (${n(majorPc(pos) + 11)}dim) nằm lẻ loi nên ít gặp. Phần lớn bài pop chỉ xoay quanh 6 ô này, ví dụ I V vi IV là ${outer[1].c} ${outer[2].c} ${inner[1].c} ${outer[0].c}.`,
-      'Thấy một hợp âm lạ trong bài? Xem nó có nằm trong 6 ô không. Nếu không, đó thường là hợp âm “mượn” để tạo màu.',
-    ],
   }
 }
 
 export default function TheoryOfWeek() {
+  const tr = useT()
   const week = isoWeek()
   const [shift, setShift] = useState(0)
   const [pos, setPos] = useState(0)
@@ -127,7 +112,7 @@ export default function TheoryOfWeek() {
   const flat = FLAT_KEYS.includes(KEYS[pos])
   const onOuter = new Set(lesson.outer.map((o) => mod(pos + o)))
   const onInner = new Set(lesson.inner.map((o) => mod(pos + o)))
-  const info = lessonInfo(lesson, pos, minor)
+  const info = lessonInfo(lesson, pos, minor, tr)
 
   const pick = (i, m) => {
     setPos(i)
@@ -146,23 +131,23 @@ export default function TheoryOfWeek() {
     <div className="card w-theory">
       <div className="w-head">
         <div>
-          <span className="w-kicker">Nhạc lý tuần {week}{shift ? ' · bài khác' : ''}</span>
-          <h2>{lesson.title}</h2>
+          <span className="w-kicker">{tr('cof.kicker', { week })}{shift ? tr('cof.other') : ''}</span>
+          <h2>{tr(`lesson.${lesson.id}.title`)}</h2>
         </div>
         <div className="w-nav">
-          <button className="ghost" aria-label="Bài trước" onClick={() => setShift(shift - 1)}>‹</button>
+          <button className="ghost" aria-label={tr('cof.prev')} onClick={() => setShift(shift - 1)}>‹</button>
           <span className="muted">{li + 1}/{LESSONS.length}</span>
-          <button className="ghost" aria-label="Bài sau" onClick={() => setShift(shift + 1)}>›</button>
+          <button className="ghost" aria-label={tr('cof.next')} onClick={() => setShift(shift + 1)}>›</button>
         </div>
       </div>
-      <p className="muted" style={{ margin: '4px 0 0' }}>{lesson.hook}</p>
+      <p className="muted" style={{ margin: '4px 0 0' }}>{tr(`lesson.${lesson.id}.hook`)}</p>
       <div className="cof-wrap">
-        <svg className="cof" viewBox="0 0 340 340" role="group" aria-label="Vòng quãng năm">
+        <svg className="cof" viewBox="0 0 340 340" role="group" aria-label={tr('cof.aria')}>
           {KEYS.map((k, i) => {
             const [x, y] = polar((R_OUT + R_MID) / 2, i * 30)
             const cls = 'o' + (onOuter.has(i) ? ' on' : '') + (pos === i && !minor ? ' tonic' : '')
             return (
-              <g key={k} className={cls} {...keyProps(i, false, `${k} trưởng`)}>
+              <g key={k} className={cls} {...keyProps(i, false, tr('majorKey', { k }))}>
                 <path d={sector(R_MID, R_OUT, i)} />
                 <text x={x} y={ENH[i] ? y - 2 : y + 7} textAnchor="middle" className="t1">{k}</text>
                 {ENH[i] && <text x={x} y={y + 15} textAnchor="middle" className="t2">{ENH[i]}</text>}
@@ -174,7 +159,7 @@ export default function TheoryOfWeek() {
             const m = minorName(i, FLAT_KEYS.includes(k))
             const cls = 'i' + (onInner.has(i) ? ' on' : '') + (pos === i && minor ? ' tonic' : '')
             return (
-              <g key={k} className={cls} {...keyProps(i, true, `${m} thứ`)}>
+              <g key={k} className={cls} {...keyProps(i, true, tr('minorKey', { k: m }))}>
                 <path d={sector(R_IN, R_MID, i)} />
                 <text x={x} y={ENH_MINOR[i] ? y - 1 : y + 5} textAnchor="middle" className="t1">{m}</text>
                 {ENH_MINOR[i] && <text x={x} y={y + 11} textAnchor="middle" className="t2">{ENH_MINOR[i]}</text>}
@@ -183,7 +168,7 @@ export default function TheoryOfWeek() {
           })}
           <circle cx={C} cy={C} r={R_IN - 6} className="hub" />
           <text x={C} y={C + 4} textAnchor="middle" className="hub-k">{minor ? minorName(pos, flat) : KEYS[pos]}</text>
-          <text x={C} y={C + 24} textAnchor="middle" className="hub-s">{minor ? 'thứ' : 'trưởng'}</text>
+          <text x={C} y={C + 24} textAnchor="middle" className="hub-s">{tr(minor ? 'minor' : 'major')}</text>
         </svg>
         <div className="cof-info">
           <h3>{info.name}</h3>
@@ -200,7 +185,7 @@ export default function TheoryOfWeek() {
             </div>
           )}
           {info.body.map((p, i) => <p key={i}>{p}</p>)}
-          <p className="muted">Chạm vào một ô bất kỳ để đổi key. Vòng ngoài là key trưởng, vòng trong là key thứ.</p>
+          <p className="muted">{tr('cof.hint')}</p>
         </div>
       </div>
     </div>

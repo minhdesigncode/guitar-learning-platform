@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n/index.jsx'
+import { cloudEnabled } from '../cloud/client.js'
 
 const ITEMS = [
   {
@@ -19,6 +20,15 @@ const ITEMS = [
         <path d="M2 6h20M2 10h20M2 14h20M2 18h20" />
         <circle cx="8" cy="10" r="1.8" fill="currentColor" />
         <circle cx="15" cy="14" r="1.8" fill="currentColor" />
+      </>
+    ),
+  },
+  {
+    id: 'explore',
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="m15.5 8.5-2 5-5 2 2-5z" />
       </>
     ),
   },
@@ -71,7 +81,7 @@ export default function TopNav({ view, account }) {
         Sổ Đàn
       </a>
       <nav className="pills">
-        {ITEMS.map((it) => (
+        {ITEMS.filter((it) => it.id !== 'explore' || cloudEnabled).map((it) => (
           <a key={it.id} href={'#' + it.id} title={t('nav.' + it.id)} aria-label={t('nav.' + it.id)} className={view === it.id ? 'on' : ''}
             aria-current={view === it.id ? 'page' : undefined}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>

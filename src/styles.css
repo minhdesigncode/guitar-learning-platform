@@ -145,3 +145,23 @@ button.dot.avatar{padding:0;border:0;cursor:pointer;overflow:visible;position:re
 .account-menu .row{gap:8px}
 .account-menu button{min-height:36px;padding:6px 14px}
 @media(max-width:640px){.signin span{display:none}.signin{padding:8px 10px}}
+
+/* publishing: draft / public status, filter, publish box */
+.tag.pub{background:color-mix(in srgb,var(--lime) 45%,transparent);color:light-dark(#4d5a12,#d5ec6e)}
+.tag.draft{background:var(--line);color:var(--mute)}
+.list .muted .tag{margin-left:8px;font-size:11.5px;padding:1px 10px;vertical-align:1px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
+.btn.ghost{background:var(--soft);color:var(--ink)}.btn.ghost:hover{background:var(--line)}
+.seg.filter{display:flex;gap:2px;background:var(--soft);border-radius:999px;padding:3px;margin:-2px 0 12px;width:fit-content;max-width:100%}
+.seg.filter button{min-height:36px;padding:6px 14px;font-size:14px}
+.seg.filter button.ghost{background:transparent}.seg.filter button.ghost:hover{background:var(--line)}
+.seg.filter small{opacity:.7;font-weight:500;margin-left:2px}
+.pub-box{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 16px;margin:8px 0 4px;padding:14px 16px;border-radius:22px;background:var(--soft)}
+.pub-box>div:first-child{flex:1 1 240px}
+.pub-box p{margin:6px 0 0}
+.pub-box.live{background:color-mix(in srgb,var(--lime) 16%,var(--card))}
+.pub-box .row{gap:8px}
+.pub-box button,.pub-box .btn{min-height:40px;padding:8px 16px;font-size:14px}
+.pub-box .pub-ask,.pub-box>.note{flex-basis:100%}
+.pub-box .pub-ask p{margin:0;flex:1 1 200px}
+.pub-box .ghost{background:var(--card)}.pub-box .ghost:hover{background:var(--line)}

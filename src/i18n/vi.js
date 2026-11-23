@@ -5,6 +5,18 @@ export default {
   'lang.short': 'EN',
 
   // Menu + hero
+  'page.journal': 'Trang chủ',
+  'page.chords': 'Hợp âm',
+  'page.practice': 'Học nhạc',
+  'page.creative': 'Sáng tạo',
+  'pageShort.journal': 'Trang chủ',
+  'pageShort.chords': 'Hợp âm',
+  'pageShort.practice': 'Học nhạc',
+  'pageShort.creative': 'Sáng tạo',
+  'tab.chords': 'Bài của tôi',
+  'tab.explore': 'Khám phá',
+  'tab.theory': 'Nhạc lý',
+  'tab.tools': 'Con Beat',
   'nav.journal': 'Trang chủ',
   'nav.chords': 'Hợp âm',
   'nav.explore': 'Khám phá',

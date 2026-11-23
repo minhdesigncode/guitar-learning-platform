@@ -6,6 +6,9 @@
 // Sections: [name, 'C G Am F | C G F C'] where "|" starts a new line.
 // `key` is the key the shapes are written in; with a capo the song sounds higher.
 
+// Turned off on 23/11/2026 at Minh's request: the cards stay in the repo, set to true to show them again.
+export const LIBRARY_VISIBLE = false
+
 const S = (title, artist, key, capo, feel, sure, sections) => ({ title, artist, key, capo, feel, sure, sections })
 
 export const LIBRARY_RAW = [
@@ -322,9 +325,10 @@ export const LIBRARY = LIBRARY_RAW.map((s) => ({
 
 export const ARTISTS = [...new Set(LIBRARY.map((s) => s.artist))]
 
-export const getLibrarySong = (id) => LIBRARY.find((s) => s.id === id) || null
+export const getLibrarySong = (id) => (!LIBRARY_VISIBLE ? null : LIBRARY.find((s) => s.id === id) || null)
 
 export const searchLibrary = (q = '', artist = '') => {
+  if (!LIBRARY_VISIBLE) return []
   const term = fold(q.trim())
   return LIBRARY.filter(
     (s) => (!artist || s.artist === artist) && (!term || fold(s.title + ' ' + s.artist).includes(term)),

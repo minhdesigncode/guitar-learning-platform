@@ -300,7 +300,7 @@ export default {
   'pub.deleteAlso': 'Bản công khai cũng sẽ bị gỡ.',
   'pub.deleteSignedOut': 'Bài đang công khai: đăng nhập rồi xoá để gỡ luôn bản công khai.',
   'ex.title': 'Bài công khai',
-  'ex.search': 'Tìm theo tên bài, nghệ sĩ hoặc người đăng…',
+  'ex.search': 'Tìm theo tên bài hoặc người đăng…',
   'ex.loading': 'Đang tải…',
   'ex.error': 'Không tải được danh sách, thử lại sau.',
   'ex.empty': 'Chưa có bài nào được đăng. Mở một bài trong Hợp âm và bấm “Đăng công khai”.',
@@ -324,5 +324,5 @@ export default {
   'ex.checkNote': 'Chỉ có hợp âm, không kèm lời. Đây là vòng hợp âm hay đánh, có chỗ có thể lệch bản thu, nghe lại để chỉnh.',
   'ex.draftNote': 'Chỉ có hợp âm, không kèm lời. Bản phác thảo: vòng hợp âm đoán, chưa dò theo bản thu, gần như chắc chắn phải sửa. Lưu về sổ rồi sửa theo tai.',
   'ex.listen': 'Nghe trên YouTube',
-  'ex.off': 'Bài người dùng đăng cần bật cloud (Supabase). Thư viện bên dưới vẫn xem được.',
+  'ex.off': 'Khám phá cần bật cloud (Supabase).',
 }

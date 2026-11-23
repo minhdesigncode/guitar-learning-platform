@@ -174,3 +174,9 @@ button.art:hover{background:var(--line)}
 button.art.on{background:var(--vbtn);color:#fff}
 .tag.chk{background:color-mix(in srgb,var(--lilac) 35%,transparent);color:var(--violet2)}
 @media (min-width:900px){.lib-list{max-height:62vh;overflow:auto;padding-right:4px}}
+/* segmented switch between the sections of one page (Chords: mine / explore, Self practice: theory / beats) */
+.subtabs{display:flex;gap:2px;background:var(--card);border-radius:999px;padding:4px;margin:0 0 18px;width:fit-content;max-width:100%;box-shadow:0 1px 0 var(--line)}
+.subtabs a{display:flex;align-items:center;min-height:40px;padding:8px 18px;border-radius:999px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:600;white-space:nowrap}
+.subtabs a.on{background:var(--violet);color:#fff}
+.subtabs a:not(.on):hover{background:var(--soft)}
+@media(max-width:640px){.subtabs{width:100%}.subtabs a{flex:1 1 0;justify-content:center;padding:8px 10px}}

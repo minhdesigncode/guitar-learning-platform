@@ -9,7 +9,7 @@ import CreativeSpace from './components/CreativeSpace.jsx'
 import Explore from './components/Explore.jsx'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
-import { SEED_SONGS } from './lib/seed.js'
+import { SEED_SONGS, dropRetiredSeeds } from './lib/seed.js'
 import { useT } from './i18n/index.jsx'
 import Account from './components/Account.jsx'
 import { useAuth } from './cloud/auth.jsx'
@@ -17,6 +17,26 @@ import { useCloudSync } from './cloud/useCloudSync.js'
 
 // Title and subtitle of each view come from the i18n dictionaries (nav.<id>, sub.<id>).
 const VIEWS = ['journal', 'chords', 'explore', 'theory', 'tools', 'creative']
+
+// Some views are sections of one page: one nav item, a segmented switch inside.
+// The hash stays per section (#explore/<id> links keep working).
+export const PAGES = { chords: ['chords', 'explore'], practice: ['theory', 'tools'] }
+export const pageOf = (view) => Object.keys(PAGES).find((p) => PAGES[p].includes(view)) ?? view
+
+function SubTabs({ page, view }) {
+  const t = useT()
+  const tabs = PAGES[page] // Explore works without the cloud too: the Sổ Đàn library is static.
+  if (tabs.length < 2) return null
+  return (
+    <nav className="subtabs" aria-label={t('page.' + page)}>
+      {tabs.map((v) => (
+        <a key={v} href={'#' + v} className={v === view ? 'on' : ''} aria-current={v === view ? 'page' : undefined}>
+          {t('tab.' + v)}
+        </a>
+      ))}
+    </nav>
+  )
+}
 
 function Waves() {
   const colors = ['#b9d440', '#bc9bf3', '#b9d440', '#bc9bf3', '#ffffff']
@@ -48,8 +68,10 @@ export default function App() {
   const t = useT()
   const [route, setRoute] = useState(currentRoute)
   const { view } = route
+  const page = pageOf(view)
   const [songs, setSongs] = useStored('sodan.songs', SEED_SONGS)
   const [journal, setJournal] = useStored('sodan.journal', [])
+  useEffect(() => setSongs(dropRetiredSeeds), [])
   const [draft, setDraft] = useState(null)
   const [openId, setOpenId] = useState(null)
   const { user } = useAuth()
@@ -61,7 +83,7 @@ export default function App() {
     const onHash = () => {
       const next = currentRoute()
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      const sameView = next.view === document.documentElement.dataset.view
+      const sameView = pageOf(next.view) === document.documentElement.dataset.view
       if (!document.startViewTransition || calm || sameView) return setRoute(next)
       document.startViewTransition(() => flushSync(() => setRoute(next)))
     }
@@ -82,7 +104,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    document.documentElement.dataset.view = view
+    document.documentElement.dataset.view = page
     if (view !== 'chords') setOpenId(null)
   }, [view])
 
@@ -108,13 +130,14 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNav view={view} account={<Account sync={user ? sync : null} />} />
+      <TopNav page={page} account={<Account sync={user ? sync : null} />} />
       <div className="hero">
-        <Waves key={view} />
-        <h1>{t('nav.' + view)}</h1>
+        <Waves key={page} />
+        <h1>{t('page.' + page)}</h1>
         <p>{t('sub.' + view)}</p>
       </div>
         <main>
+          {PAGES[page] && <SubTabs page={page} view={view} />}
           {view === 'journal' && (
             <>
               <div className="stats">

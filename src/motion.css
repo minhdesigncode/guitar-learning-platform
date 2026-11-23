@@ -30,7 +30,7 @@ nav.pills a.on{view-transition-name:nav-pill}
 @media(max-width:640px){
   nav.pills a{flex-direction:column;gap:2px;padding:7px 12px;min-height:52px;justify-content:center}
   nav.pills a em{font-size:11px;line-height:1.1;white-space:nowrap}
-  /* six tabs: share the bar's width evenly instead of each taking its own padding */
+  /* four tabs: share the bar's width evenly instead of each taking its own padding */
   nav.pills{width:calc(100vw - 20px);max-width:480px;gap:0}
   nav.pills a{flex:1 1 0;padding:7px 2px;align-items:center}}
 

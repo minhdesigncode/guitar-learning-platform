@@ -122,6 +122,21 @@ export default {
   'cs.hideList': 'Ẩn danh sách',
   'cs.recs': 'Bản thu của bài này',
   'cs.deleteSong': 'Xoá bài',
+  // Chord shapes popup
+  'chord.open': 'Xem thế tay {name}',
+  'chord.dialog': 'Thế tay {name}',
+  'chord.close': 'Đóng',
+  'chord.play': 'Nghe {name}',
+  'chord.arp': 'Bấm vào sơ đồ để nghe rải từng dây',
+  'chord.diagram': 'Sơ đồ thế tay {name}',
+  'chord.shape': 'Thế tay',
+  'chord.prevShape': 'Thế tay trước',
+  'chord.nextShape': 'Thế tay sau',
+  'chord.transpose': 'Đổi tông',
+  'chord.reset': 'Về {name}',
+  'chord.loading': 'Đang tải thế tay…',
+  'chord.none': 'Chưa có thế tay cho hợp âm này.',
+  'chord.simpler': 'Chưa có thế riêng cho {name}, đây là thế {base}.',
 
   // Nhạc lý tuần này (vòng quãng năm)
   'cof.kicker': 'Nhạc lý tuần {week}',

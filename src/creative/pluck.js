@@ -4,7 +4,7 @@
 
 const FREQ = { 6: 82.41, 5: 110.0, 4: 146.83, 3: 196.0, 2: 246.94, 1: 329.63 }
 
-function render(ac, f, seconds = 2.6) {
+export function render(ac, f, seconds = 2.6) {
   const sr = ac.sampleRate
   const n = Math.round(sr / f)
   const len = Math.round(sr * seconds)

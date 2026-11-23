@@ -9,7 +9,7 @@ import CreativeSpace from './components/CreativeSpace.jsx'
 import Explore from './components/Explore.jsx'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
-import { SEED_SONGS } from './lib/seed.js'
+import { SEED_SONGS, dropRetiredSeeds } from './lib/seed.js'
 import { useT } from './i18n/index.jsx'
 import Account from './components/Account.jsx'
 import { useAuth } from './cloud/auth.jsx'
@@ -72,6 +72,7 @@ export default function App() {
   const page = pageOf(view)
   const [songs, setSongs] = useStored('sodan.songs', SEED_SONGS)
   const [journal, setJournal] = useStored('sodan.journal', [])
+  useEffect(() => setSongs(dropRetiredSeeds), [])
   const [draft, setDraft] = useState(null)
   const [openId, setOpenId] = useState(null)
   const { user } = useAuth()

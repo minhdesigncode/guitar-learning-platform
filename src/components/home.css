@@ -49,7 +49,7 @@
 /* theory of the week: circle of fifths */
 .cof-wrap{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:center;margin-top:16px}
 @media(max-width:760px){.cof-wrap{grid-template-columns:minmax(0,1fr)}.cof{max-width:380px;margin:auto}}
-.cof{width:100%;height:auto;display:block;font-family:Poppins,sans-serif;user-select:none}
+.cof{width:100%;height:auto;display:block;font-family:var(--font);user-select:none}
 .cof g{cursor:pointer;outline:none}
 .cof path{fill:var(--card);stroke:var(--ink);stroke-opacity:.18;stroke-width:1.5;transition:fill .15s}
 .cof .i path{fill:var(--soft)}

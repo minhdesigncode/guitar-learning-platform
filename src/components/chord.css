@@ -24,8 +24,8 @@
 .chord-svg .string,.chord-svg .fret{stroke:var(--ink);stroke-width:1.3;opacity:.55}
 .chord-svg .nut{fill:var(--ink)}
 .chord-svg .cd-dot{fill:var(--violet)}
-.chord-svg .finger{fill:#fff;font:600 11px Poppins,sans-serif;text-anchor:middle}
-.chord-svg .fr{fill:var(--mute);font:500 10.5px Poppins,sans-serif}
+.chord-svg .finger{fill:#fff;font:600 11px var(--font);text-anchor:middle}
+.chord-svg .fr{fill:var(--mute);font:500 10.5px var(--font)}
 .chord-svg .open{fill:none;stroke:var(--ink);stroke-width:1.6}
 .chord-svg .mute{stroke:var(--ink);stroke-width:1.8;stroke-linecap:round}
 .chord-msg{font-size:13px;margin:6px 0}

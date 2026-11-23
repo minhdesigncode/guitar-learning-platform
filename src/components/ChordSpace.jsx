@@ -171,7 +171,7 @@ const Mag = ({ plus }) => (
   </svg>
 )
 
-function useView() {
+export function useView() {
   const [v, setV] = useState(() => {
     try {
       return { zoom: 1, cols: 1, fit: false, wide: false, ...JSON.parse(localStorage.getItem('sodan.view') || '{}') }
@@ -229,6 +229,73 @@ function fitSheet(el, bar) {
   el.style.setProperty('--z', keep.z)
   el.style.columnCount = keep.c
   return best
+}
+
+// Zoom / fit / columns toolbar plus the sheet. Used by "My songs" and Explore; the view
+// settings (v, setView from useView) live in the parent so it can also react to "wide".
+export function SheetView({ body, v, setView }) {
+  const t = useT()
+  const sheetRef = useRef(null)
+  const barRef = useRef(null)
+
+  const refit = useCallback(() => {
+    const r = fitSheet(sheetRef.current, barRef.current)
+    if (r) setView(r)
+  }, [setView])
+
+  // In fit mode, refit whenever the song, key, layout or window size changes.
+  useLayoutEffect(() => {
+    if (v.fit) refit()
+  }, [v.fit, v.wide, body, refit])
+  useEffect(() => {
+    if (!v.fit) return
+    const on = () => refit()
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [v.fit, refit])
+
+  const zoomBy = (d) => setView({ fit: false, zoom: clampZ(v.zoom + d) })
+  const fitNow = () => {
+    const bar = barRef.current
+    const nav = document.querySelector('.topnav')
+    if (bar) {
+      const navH = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + 14 : 0
+      window.scrollTo({ top: bar.getBoundingClientRect().top + window.scrollY - navH - 12 })
+    }
+    if (v.fit) refit()
+    else setView({ fit: true })
+  }
+
+  return (
+    <>
+      <div ref={barRef} className="zoombar" role="toolbar" aria-label={t('cs.toolbar')}>
+        <div className="seg">
+          <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label={t('cs.zoomOut')} title={t('cs.zoomOutTitle')}>
+            <Mag />
+          </button>
+          <button className="ghost pct" onClick={() => setView({ fit: false, zoom: 1 })} title={t('cs.zoomReset')}>
+            {Math.round(v.zoom * 100)}%
+          </button>
+          <button className="ghost icon" onClick={() => zoomBy(0.1)} disabled={v.zoom >= ZMAX} aria-label={t('cs.zoomIn')} title={t('cs.zoomInTitle')}>
+            <Mag plus />
+          </button>
+        </div>
+        <button className={v.fit ? 'pick' : 'ghost'} onClick={fitNow} aria-pressed={v.fit} title={t('cs.fitTitle')}>
+          {t('cs.fit')}
+        </button>
+        <div className="seg" role="group" aria-label={t('cs.cols')}>
+          {[1, 2, 3].map((n) => (
+            <button key={n} className={v.cols === n ? 'pick' : 'ghost'} aria-pressed={v.cols === n}
+              onClick={() => setView({ fit: false, cols: n })}>{t('cs.colN', { n })}</button>
+          ))}
+        </div>
+        <button className="ghost" onClick={() => setView({ wide: !v.wide })} aria-pressed={v.wide}>
+          {v.wide ? t('cs.showList') : t('cs.hideList')}
+        </button>
+      </div>
+      <Sheet ref={sheetRef} body={body} zoom={v.zoom} cols={v.cols} />
+    </>
+  )
 }
 
 function Editor({ song, onSave, onCancel }) {
@@ -311,8 +378,6 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
   const { enabled: cloudOn, user } = useAuth()
   const [v, setView] = useView()
   const { t, locale } = useI18n()
-  const sheetRef = useRef(null)
-  const barRef = useRef(null)
 
   useEffect(() => {
     if (draft) {
@@ -344,34 +409,6 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
   const shift = (d) => setOffset((o) => (Math.abs(o + d) > 11 ? 0 : o + d))
   const view = cur ? transposeKey(cur.key || 'C', offset) : null
   const body = cur ? transposeBody(cur.body || '', offset, view.flat) : ''
-
-  const refit = useCallback(() => {
-    const r = fitSheet(sheetRef.current, barRef.current)
-    if (r) setView(r)
-  }, [setView])
-
-  // In fit mode, refit whenever the song, key, layout or window size changes.
-  useLayoutEffect(() => {
-    if (v.fit && !editing) refit()
-  }, [v.fit, v.wide, body, editing, refit])
-  useEffect(() => {
-    if (!v.fit) return
-    const on = () => refit()
-    window.addEventListener('resize', on)
-    return () => window.removeEventListener('resize', on)
-  }, [v.fit, refit])
-
-  const zoomBy = (d) => setView({ fit: false, zoom: clampZ(v.zoom + d) })
-  const fitNow = () => {
-    const bar = barRef.current
-    const nav = document.querySelector('.topnav')
-    if (bar) {
-      const navH = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + 14 : 0
-      window.scrollTo({ top: bar.getBoundingClientRect().top + window.scrollY - navH - 12 })
-    }
-    if (v.fit) refit()
-    else setView({ fit: true })
-  }
 
   return (
     <div className={v.wide && cur && !editing ? 'grid solo' : 'grid'}>
@@ -439,32 +476,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
               {cur.capo ? t('cs.capo', { n: cur.capo }) : ''}
             </p>
             <PublishBox song={cur} onPatch={patch} />
-            <div ref={barRef} className="zoombar" role="toolbar" aria-label={t('cs.toolbar')}>
-              <div className="seg">
-                <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label={t('cs.zoomOut')} title={t('cs.zoomOutTitle')}>
-                  <Mag />
-                </button>
-                <button className="ghost pct" onClick={() => setView({ fit: false, zoom: 1 })} title={t('cs.zoomReset')}>
-                  {Math.round(v.zoom * 100)}%
-                </button>
-                <button className="ghost icon" onClick={() => zoomBy(0.1)} disabled={v.zoom >= ZMAX} aria-label={t('cs.zoomIn')} title={t('cs.zoomInTitle')}>
-                  <Mag plus />
-                </button>
-              </div>
-              <button className={v.fit ? 'pick' : 'ghost'} onClick={fitNow} aria-pressed={v.fit} title={t('cs.fitTitle')}>
-                {t('cs.fit')}
-              </button>
-              <div className="seg" role="group" aria-label={t('cs.cols')}>
-                {[1, 2, 3].map((n) => (
-                  <button key={n} className={v.cols === n ? 'pick' : 'ghost'} aria-pressed={v.cols === n}
-                    onClick={() => setView({ fit: false, cols: n })}>{t('cs.colN', { n })}</button>
-                ))}
-              </div>
-              <button className="ghost" onClick={() => setView({ wide: !v.wide })} aria-pressed={v.wide}>
-                {v.wide ? t('cs.showList') : t('cs.hideList')}
-              </button>
-            </div>
-            <Sheet ref={sheetRef} body={body} zoom={v.zoom} cols={v.cols} />
+            <SheetView body={body} v={v} setView={setView} />
             {recs.length > 0 && (
               <div className="rec-box">
                 <h3>{t('cs.recs')}</h3>

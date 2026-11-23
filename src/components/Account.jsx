@@ -39,7 +39,7 @@ export default function Account({ sync }) {
   }, [open])
 
   // No Supabase config yet: keep the old badge so nothing changes visually.
-  if (!enabled) return <span className="dot" aria-hidden="true">M</span>
+  if (!enabled) return <span className="dot dot-mark" aria-hidden="true"><img src="/logo-mark.svg" alt="" /></span>
   if (!ready) return <span className="dot" aria-hidden="true" />
 
   if (!user) {

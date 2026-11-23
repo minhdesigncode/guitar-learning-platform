@@ -22,6 +22,10 @@ create table if not exists public.journal_entries (
 alter table public.songs enable row level security;
 alter table public.journal_entries enable row level security;
 
+-- Quyền cho API (PostgREST). Project Supabase mới không tự cấp quyền bảng cho anon/authenticated,
+-- thiếu dòng này thì app báo "permission denied" dù RLS đúng.
+grant select, insert, update, delete on public.songs, public.journal_entries to authenticated;
+
 drop policy if exists "own songs" on public.songs;
 create policy "own songs" on public.songs
   for all to authenticated
@@ -80,6 +84,9 @@ create table if not exists public.public_songs (
 create index if not exists public_songs_updated_idx on public.public_songs (updated_at desc);
 
 alter table public.public_songs enable row level security;
+
+grant select on public.public_songs to anon, authenticated;
+grant insert, update, delete on public.public_songs to authenticated;
 
 drop policy if exists "anyone reads public songs" on public.public_songs;
 create policy "anyone reads public songs" on public.public_songs

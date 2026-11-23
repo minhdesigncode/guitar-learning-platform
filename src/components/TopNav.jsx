@@ -57,11 +57,7 @@ export default function TopNav({ page, account }) {
     <header className="topnav">
       <a className="brand" href="#journal">
         <span className="logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#b9d440" strokeWidth="2.4" strokeLinecap="round">
-            <path d="M9 18V5l11-2v13" />
-            <circle cx="6" cy="18" r="3" />
-            <circle cx="17" cy="16" r="3" />
-          </svg>
+          <img src="/logo-mark.svg" alt="" />
         </span>
         Sổ Đàn
       </a>

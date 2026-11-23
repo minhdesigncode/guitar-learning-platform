@@ -7,11 +7,11 @@ export default {
   // Menu + hero
   'page.journal': 'Trang chủ',
   'page.chords': 'Hợp âm',
-  'page.practice': 'Tự luyện',
+  'page.practice': 'Học nhạc',
   'page.creative': 'Sáng tạo',
   'pageShort.journal': 'Trang chủ',
   'pageShort.chords': 'Hợp âm',
-  'pageShort.practice': 'Tự luyện',
+  'pageShort.practice': 'Học nhạc',
   'pageShort.creative': 'Sáng tạo',
   'tab.chords': 'Bài của tôi',
   'tab.explore': 'Khám phá',

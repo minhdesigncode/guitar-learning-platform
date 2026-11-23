@@ -4,7 +4,7 @@ import { cloudEnabled } from '../cloud/client.js'
 import { useAuth } from '../cloud/auth.jsx'
 import { searchPublic, getPublic } from '../cloud/publish.js'
 import { useI18n } from '../i18n/index.jsx'
-import { Sheet } from './ChordSpace.jsx'
+import { SheetView, useView } from './ChordSpace.jsx'
 import { ARTISTS, LIBRARY, LIBRARY_VISIBLE, getLibrarySong, searchLibrary } from '../lib/library/songs.js'
 
 const LIB = 'lib-'
@@ -22,6 +22,7 @@ export default function Explore({ openId, songs, onSaveCopy }) {
   const [offset, setOffset] = useState(0)
   const [msg, setMsg] = useState('')
   const [artist, setArtist] = useState('')
+  const [v, setView] = useView()
   const libId = openId?.startsWith(LIB) ? openId.slice(LIB.length) : null
   const libList = searchLibrary(q, artist)
 
@@ -79,7 +80,7 @@ export default function Explore({ openId, songs, onSaveCopy }) {
   }
 
   return (
-    <div className="grid">
+    <div className={v.wide && song ? 'grid solo' : 'grid'}>
       <div className="card">
         <h2>{t('ex.title')}</h2>
         <input type="search" placeholder={t('ex.search')} aria-label={t('ex.search')} style={{ margin: '12px 0' }} value={q} onChange={(e) => setQ(e.target.value)} />
@@ -177,7 +178,7 @@ export default function Explore({ openId, songs, onSaveCopy }) {
               {song.capo ? t('cs.capo', { n: song.capo }) : ''}
             </p>
             {lib && <p className="note">{t(song.sure ? 'ex.checkNote' : 'ex.draftNote')}</p>}
-            <Sheet body={body} zoom={1} cols={1} />
+            <SheetView body={body} v={v} setView={setView} />
           </div>
         )}
       </div>

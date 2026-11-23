@@ -26,3 +26,7 @@ npm run build
 ```
 
 Deploys to Vercel as a standard Vite project (build command `npm run build`, output `dist`).
+
+## Đăng nhập + cloud
+
+Đăng nhập Google và đồng bộ bài/bản thu qua Supabase. Không có env thì app chạy local như cũ. Cách bật: [docs/SETUP-CLOUD.md](docs/SETUP-CLOUD.md).

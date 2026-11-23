@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { loadMedia, deleteMedia } from '../lib/store.js'
+import { deleteMedia } from '../lib/store.js'
+import { fetchMedia } from '../cloud/media.js'
 import Icon from './Icon.jsx'
 import { useI18n, useT } from '../i18n/index.jsx'
 
@@ -16,15 +17,19 @@ export function Media({ id, type }) {
   const [url, setUrl] = useState(null)
   useEffect(() => {
     let u = null
-    loadMedia(id)
+    let gone = false
+    fetchMedia(id)
       .then((blob) => {
-        if (blob) {
+        if (blob && !gone) {
           u = URL.createObjectURL(blob)
           setUrl(u)
         }
       })
       .catch(() => {})
-    return () => u && URL.revokeObjectURL(u)
+    return () => {
+      gone = true
+      if (u) URL.revokeObjectURL(u)
+    }
   }, [id])
   if (!url) return null
   return String(type).startsWith('video') ? <video controls src={url} /> : <audio controls src={url} />

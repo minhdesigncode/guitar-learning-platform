@@ -5,6 +5,8 @@ import { Media, Recorder } from './Journal.jsx'
 import { useI18n, useT } from '../i18n/index.jsx'
 import { useAuth } from '../cloud/auth.jsx'
 import { publishSong, unpublishSong } from '../cloud/publish.js'
+import { parseChord } from '../lib/chords/index.js'
+import ChordPopover from './ChordPopover.jsx'
 
 // draft: never published · live: public copy matches · changed: edited since the last publish
 export const pubState = (song) =>
@@ -98,7 +100,7 @@ function sections(body) {
   return out
 }
 
-function Line({ line }) {
+function Line({ line, label }) {
   if (/^\s*#/.test(line)) return <div className="sec">{line.replace(/^\s*#+\s*/, '')}</div>
   if (!line.trim()) return <div className="ln">&nbsp;</div>
   if (!line.includes('[')) return <div className="ln">{line}</div>
@@ -110,7 +112,11 @@ function Line({ line }) {
     <div className="ln">
       {segs.map(([c, t], j) => (
         <span key={j} className="sg">
-          <i>{c}</i>
+          {c && parseChord(c) ? (
+            <i data-chord={c} role="button" tabIndex={0} aria-label={label(c)}>{c}</i>
+          ) : (
+            <i>{c}</i>
+          )}
           {t}
         </span>
       ))}
@@ -118,15 +124,38 @@ function Line({ line }) {
   )
 }
 
+// Lyrics with chords; tapping a chord opens its shapes.
 export const Sheet = forwardRef(function Sheet({ body, zoom, cols }, ref) {
+  const t = useT()
+  const [open, setOpen] = useState(null) // { name, el }
+  useEffect(() => setOpen(null), [body])
+  const pick = (e) => {
+    const el = e.target.closest?.('[data-chord]')
+    if (!el) return
+    if (e.type === 'keydown') {
+      if (e.key !== 'Enter' && e.key !== ' ') return
+      e.preventDefault()
+    }
+    setOpen((o) => (o?.el === el ? null : { name: el.dataset.chord, el }))
+  }
+  const close = useCallback((refocus) => {
+    setOpen((o) => {
+      if (refocus) o?.el?.focus()
+      return null
+    })
+  }, [])
+  const label = useCallback((c) => t('chord.open', { name: c }), [t])
   return (
-    <div ref={ref} className="sheet" style={{ '--z': zoom, columnCount: cols }}>
-      {sections(body).map((sec, i) => (
-        <div key={i} className="blk">
-          {sec.map((line, j) => <Line key={j} line={line} />)}
-        </div>
-      ))}
-    </div>
+    <>
+      <div ref={ref} className="sheet" style={{ '--z': zoom, columnCount: cols }} onClick={pick} onKeyDown={pick}>
+        {sections(body).map((sec, i) => (
+          <div key={i} className="blk">
+            {sec.map((line, j) => <Line key={j} line={line} label={label} />)}
+          </div>
+        ))}
+      </div>
+      {open && <ChordPopover name={open.name} anchor={open.el} onClose={close} />}
+    </>
   )
 })
 

@@ -1,9 +1,9 @@
 import { useI18n } from '../i18n/index.jsx'
-import { cloudEnabled } from '../cloud/client.js'
 
 const ITEMS = [
   {
     id: 'journal',
+    href: 'journal',
     icon: (
       <>
         <rect x="4" y="3" width="16" height="18" rx="3" />
@@ -15,6 +15,7 @@ const ITEMS = [
   },
   {
     id: 'chords',
+    href: 'chords',
     icon: (
       <>
         <path d="M2 6h20M2 10h20M2 14h20M2 18h20" />
@@ -24,16 +25,8 @@ const ITEMS = [
     ),
   },
   {
-    id: 'explore',
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="m15.5 8.5-2 5-5 2 2-5z" />
-      </>
-    ),
-  },
-  {
-    id: 'theory',
+    id: 'practice',
+    href: 'theory',
     icon: (
       <>
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" />
@@ -42,17 +35,8 @@ const ITEMS = [
     ),
   },
   {
-    id: 'tools',
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="8" />
-        <circle cx="12" cy="12" r="2.5" />
-        <path d="M12 4v3M12 17v3M4 12h3M17 12h3" />
-      </>
-    ),
-  },
-  {
     id: 'creative',
+    href: 'creative',
     icon: (
       <>
         <path d="M13.5 10.5 20 4" />
@@ -65,7 +49,8 @@ const ITEMS = [
 ]
 
 // Floating pill menu across the top (moves to the bottom of the screen on phones).
-export default function TopNav({ view, account }) {
+// Explore lives inside the Chords page and Beats inside Self practice, so they have no item of their own.
+export default function TopNav({ page, account }) {
   const { t, lang, setLang } = useI18n()
   const other = lang === 'vi' ? 'en' : 'vi'
   return (
@@ -81,13 +66,13 @@ export default function TopNav({ view, account }) {
         Sổ Đàn
       </a>
       <nav className="pills">
-        {ITEMS.filter((it) => it.id !== 'explore' || cloudEnabled).map((it) => (
-          <a key={it.id} href={'#' + it.id} title={t('nav.' + it.id)} aria-label={t('nav.' + it.id)} className={view === it.id ? 'on' : ''}
-            aria-current={view === it.id ? 'page' : undefined}>
+        {ITEMS.map((it) => (
+          <a key={it.id} href={'#' + it.href} title={t('page.' + it.id)} aria-label={t('page.' + it.id)} className={page === it.id ? 'on' : ''}
+            aria-current={page === it.id ? 'page' : undefined}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>
-            <span>{t('nav.' + it.id)}</span>
+            <span>{t('page.' + it.id)}</span>
             {/* Shorter name for the phone tab bar, where every item shows its label under the icon. */}
-            <em aria-hidden="true">{t('navShort.' + it.id)}</em>
+            <em aria-hidden="true">{t('pageShort.' + it.id)}</em>
           </a>
         ))}
       </nav>

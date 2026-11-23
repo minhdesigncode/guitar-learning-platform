@@ -6,6 +6,7 @@ import ChordSpace from './components/ChordSpace.jsx'
 import Theory from './components/Theory.jsx'
 import Tools from './components/Tools.jsx'
 import CreativeSpace from './components/CreativeSpace.jsx'
+import Explore from './components/Explore.jsx'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS } from './lib/seed.js'
@@ -15,7 +16,7 @@ import { useAuth } from './cloud/auth.jsx'
 import { useCloudSync } from './cloud/useCloudSync.js'
 
 // Title and subtitle of each view come from the i18n dictionaries (nav.<id>, sub.<id>).
-const VIEWS = ['journal', 'chords', 'theory', 'tools', 'creative']
+const VIEWS = ['journal', 'chords', 'explore', 'theory', 'tools', 'creative']
 
 function Waves() {
   const colors = ['#b9d440', '#bc9bf3', '#b9d440', '#bc9bf3', '#ffffff']
@@ -37,14 +38,16 @@ function Waves() {
   )
 }
 
-const currentView = () => {
-  const h = window.location.hash.slice(1)
-  return VIEWS.includes(h) ? h : 'journal'
+// #view, or #explore/<public song id> to open one published song (shareable link).
+const currentRoute = () => {
+  const [v, param = null] = window.location.hash.slice(1).split('/')
+  return VIEWS.includes(v) ? { view: v, param } : { view: 'journal', param: null }
 }
 
 export default function App() {
   const t = useT()
-  const [view, setView] = useState(currentView)
+  const [route, setRoute] = useState(currentRoute)
+  const { view } = route
   const [songs, setSongs] = useStored('sodan.songs', SEED_SONGS)
   const [journal, setJournal] = useStored('sodan.journal', [])
   const [draft, setDraft] = useState(null)
@@ -56,10 +59,11 @@ export default function App() {
     // Tab changes run inside a view transition where the browser has one:
     // the violet nav pill slides to the new tab and the page content crossfades.
     const onHash = () => {
-      const next = currentView()
+      const next = currentRoute()
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (!document.startViewTransition || calm) return setView(next)
-      document.startViewTransition(() => flushSync(() => setView(next)))
+      const sameView = next.view === document.documentElement.dataset.view
+      if (!document.startViewTransition || calm || sameView) return setRoute(next)
+      document.startViewTransition(() => flushSync(() => setRoute(next)))
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
@@ -78,8 +82,12 @@ export default function App() {
   }
 
   useEffect(() => {
+    document.documentElement.dataset.view = view
     if (view !== 'chords') setOpenId(null)
   }, [view])
+
+  // Copy a published song into your own list (works signed out too: it lands in local storage).
+  const saveCopy = (song) => setSongs((list) => [{ ...song, id: uid(), updated: Date.now() }, ...list])
 
   const addRecording = async (song, { file, kind }) => {
     // Store the key itself, not a translated label, so the note follows the current language.
@@ -129,6 +137,7 @@ export default function App() {
           {view === 'chords' && (
             <ChordSpace openId={openId} journal={journal} onAddRecording={addRecording} songs={songs} setSongs={setSongs} draft={draft} clearDraft={() => setDraft(null)} />
           )}
+          {view === 'explore' && <Explore openId={route.param} songs={songs} onSaveCopy={saveCopy} />}
           {view === 'theory' && <Theory onCreateSong={newSongFromProgression} />}
           {view === 'tools' && <Tools />}
           {view === 'creative' && <CreativeSpace />}

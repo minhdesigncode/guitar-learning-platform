@@ -56,3 +56,11 @@ Chạy local: copy `.env.example` thành `.env`, điền 2 giá trị, `npm run 
 - Bản thu ghi ở máy khác sẽ tải về khi mở và được cache lại trên máy.
 - Đăng xuất: dữ liệu vẫn để trên máy. Nếu một tài khoản **khác** đăng nhập trên cùng máy, app thay dữ liệu trên máy bằng dữ liệu của tài khoản đó (không trộn dữ liệu của hai người).
 - Free tier Supabase: 500 MB database, 1 GB file. Bản thu webm ~1 MB/phút, nên khoảng 15 tiếng thu âm.
+
+## Đăng bài công khai (Khám phá)
+Cần bảng `public_songs`. Project đã chạy `schema.sql` từ trước thì chạy lại **toàn bộ** file `supabase/schema.sql` trong SQL Editor (file viết kiểu chạy lại bao nhiêu lần cũng được) là có.
+
+- Bài trong **Hợp âm** mặc định là **Nháp**: chỉ mình bạn thấy (lưu trên máy, đồng bộ lên tài khoản nếu đăng nhập).
+- Bấm **Đăng công khai** (cần đăng nhập) để chụp một bản lên `public_songs`. Sửa bài sau đó không tự lên bản công khai, phải bấm **Cập nhật bản công khai**.
+- Tab **Khám phá**: ai cũng tìm (theo tên bài, tên người đăng), xem, đổi tông và lưu bản sao về sổ mình, không cần đăng nhập. Link `#explore/<id>` mở thẳng một bài.
+- RLS: ai cũng đọc được `public_songs`; chỉ chủ bài được thêm, sửa, gỡ.

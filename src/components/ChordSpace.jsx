@@ -3,6 +3,90 @@ import { transposeBody, transposeKey } from '../lib/music.js'
 import { uid } from '../lib/store.js'
 import { Media, Recorder } from './Journal.jsx'
 import { useI18n, useT } from '../i18n/index.jsx'
+import { useAuth } from '../cloud/auth.jsx'
+import { publishSong, unpublishSong } from '../cloud/publish.js'
+
+// draft: never published · live: public copy matches · changed: edited since the last publish
+export const pubState = (song) =>
+  !song.published ? 'draft' : (song.updated || 0) > (song.published.updated || 0) ? 'changed' : 'live'
+
+// Publish / update / take down the public copy of a song. Needs an account; signed out it offers sign-in.
+function PublishBox({ song, onPatch }) {
+  const { enabled, user, signIn } = useAuth()
+  const t = useT()
+  const [busy, setBusy] = useState(false)
+  const [ask, setAsk] = useState(false)
+  const [sure, setSure] = useState(false)
+  const [err, setErr] = useState('')
+  useEffect(() => {
+    setAsk(false)
+    setSure(false)
+    setErr('')
+  }, [song.id])
+  if (!enabled) return null
+  const state = pubState(song)
+
+  const publish = async () => {
+    if (!user) return setAsk(true)
+    setBusy(true)
+    setErr('')
+    try {
+      const { id, at } = await publishSong(user, song)
+      onPatch({ ...song, published: { id, at, updated: song.updated || 0 } })
+    } catch (e) {
+      console.warn('[publish]', e)
+      setErr(t('pub.error'))
+    } finally {
+      setBusy(false)
+    }
+  }
+  const unpublish = async () => {
+    if (!sure) return setSure(true)
+    setBusy(true)
+    setErr('')
+    try {
+      await unpublishSong(user, song.id)
+      onPatch({ ...song, published: undefined })
+    } catch (e) {
+      console.warn('[publish]', e)
+      setErr(t('pub.error'))
+    } finally {
+      setBusy(false)
+      setSure(false)
+    }
+  }
+
+  return (
+    <div className={'pub-box ' + state}>
+      <div>
+        <span className={'tag ' + (state === 'draft' ? 'draft' : 'pub')}>{t('pub.state.' + state)}</span>
+        <p className="muted">{t('pub.help.' + state)}</p>
+      </div>
+      <div className="row">
+        {state !== 'live' && (
+          <button className="pick" onClick={publish} disabled={busy}>
+            {busy ? t('pub.working') : state === 'draft' ? t('pub.publish') : t('pub.update')}
+          </button>
+        )}
+        {state !== 'draft' && (
+          <>
+            <a className="btn ghost" href={'#explore/' + song.published.id}>{t('pub.view')}</a>
+            {user && (
+              <button className="ghost" onClick={unpublish} disabled={busy}>{sure ? t('pub.unpublishSure') : t('pub.unpublish')}</button>
+            )}
+          </>
+        )}
+      </div>
+      {ask && !user && (
+        <div className="row pub-ask">
+          <p className="muted">{t('pub.needSignIn')}</p>
+          <button className="ghost" onClick={signIn}>{t('auth.signInGoogle')}</button>
+        </div>
+      )}
+      {err && <p className="note" role="alert">{err}</p>}
+    </div>
+  )
+}
 
 // Split the body into sections (a # heading starts a new one) so columns never cut a heading off its lines.
 function sections(body) {
@@ -34,7 +118,7 @@ function Line({ line }) {
   )
 }
 
-const Sheet = forwardRef(function Sheet({ body, zoom, cols }, ref) {
+export const Sheet = forwardRef(function Sheet({ body, zoom, cols }, ref) {
   return (
     <div ref={ref} className="sheet" style={{ '--z': zoom, columnCount: cols }}>
       {sections(body).map((sec, i) => (
@@ -194,6 +278,8 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
   const [offset, setOffset] = useState(0)
   const [q, setQ] = useState('')
   const [sure, setSure] = useState(false)
+  const [only, setOnly] = useState('all')
+  const { enabled: cloudOn, user } = useAuth()
   const [v, setView] = useView()
   const { t, locale } = useI18n()
   const sheetRef = useRef(null)
@@ -222,6 +308,9 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
     setCurId(s.id)
     setEditing(null)
   }
+
+  // Replace a song without touching its "updated" time (used for publish state).
+  const patch = (song) => setSongs((list) => list.map((x) => (x.id === song.id ? song : x)))
 
   const shift = (d) => setOffset((o) => (Math.abs(o + d) > 11 ? 0 : o + d))
   const view = cur ? transposeKey(cur.key || 'C', offset) : null
@@ -265,15 +354,28 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
           </button>
         </div>
         <input placeholder={t('cs.search')} style={{ margin: '12px 0' }} value={q} onChange={(e) => setQ(e.target.value)} />
+        {cloudOn && songs.length > 0 && (
+          <div className="seg filter" role="group" aria-label={t('pub.filter')}>
+            {['all', 'draft', 'pub'].map((k) => (
+              <button key={k} className={only === k ? 'pick' : 'ghost'} aria-pressed={only === k} onClick={() => setOnly(k)}>
+                {t('pub.only.' + k)} <small>{k === 'all' ? songs.length : songs.filter((s) => (pubState(s) === 'draft') === (k === 'draft')).length}</small>
+              </button>
+            ))}
+          </div>
+        )}
         {!songs.length && <p className="note">{t('cs.empty')}</p>}
         <ul className="list">
           {sorted
             .filter((s) => !q || s.title.toLowerCase().includes(q.toLowerCase()))
+            .filter((s) => only === 'all' || (pubState(s) === 'draft') === (only === 'draft'))
             .map((s) => (
               <li key={s.id} className={s.id === curId && !editing ? 'on' : ''} onClick={() => select(s.id)} tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && select(s.id)}>
                 <b>{s.title}</b>
-                <div className="muted">{t('keyOf', { key: s.key })}{s.capo ? ' · ' + t('capoOf', { n: s.capo }) : ''}</div>
+                <div className="muted">
+                  {t('keyOf', { key: s.key })}{s.capo ? ' · ' + t('capoOf', { n: s.capo }) : ''}
+                  {cloudOn && <span className={'tag ' + (s.published ? 'pub' : 'draft')}>{t('pub.state.' + pubState(s))}</span>}
+                </div>
               </li>
             ))}
         </ul>
@@ -307,6 +409,7 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
               {offset !== 0 && t('cs.shifted', { offset, from: cur.key })}
               {cur.capo ? t('cs.capo', { n: cur.capo }) : ''}
             </p>
+            <PublishBox song={cur} onPatch={patch} />
             <div ref={barRef} className="zoombar" role="toolbar" aria-label={t('cs.toolbar')}>
               <div className="seg">
                 <button className="ghost icon" onClick={() => zoomBy(-0.1)} disabled={v.zoom <= ZMIN} aria-label={t('cs.zoomOut')} title={t('cs.zoomOutTitle')}>
@@ -347,10 +450,13 @@ export default function ChordSpace({ songs, setSongs, draft, clearDraft, openId,
             <div className="row" style={{ marginTop: 16 }}>
               <button className="ghost" onClick={() => {
                 if (!sure) return setSure(true)
+                // A deleted song should not stay public.
+                if (cur.published && user) unpublishSong(user, cur.id).catch((e) => console.warn('[publish]', e))
                 setSongs(songs.filter((s) => s.id !== cur.id))
                 setCurId(null)
                 setSure(false)
               }}>{sure ? t('confirmDelete') : t('cs.deleteSong')}</button>
+              {sure && cur.published && <span className="muted">{user ? t('pub.deleteAlso') : t('pub.deleteSignedOut')}</span>}
             </div>
           </div>
         )}

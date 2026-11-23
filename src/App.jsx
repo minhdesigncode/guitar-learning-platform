@@ -14,7 +14,6 @@ import { useT } from './i18n/index.jsx'
 import Account from './components/Account.jsx'
 import { useAuth } from './cloud/auth.jsx'
 import { useCloudSync } from './cloud/useCloudSync.js'
-import { cloudEnabled } from './cloud/client.js'
 
 // Title and subtitle of each view come from the i18n dictionaries (nav.<id>, sub.<id>).
 const VIEWS = ['journal', 'chords', 'explore', 'theory', 'tools', 'creative']
@@ -26,7 +25,7 @@ export const pageOf = (view) => Object.keys(PAGES).find((p) => PAGES[p].includes
 
 function SubTabs({ page, view }) {
   const t = useT()
-  const tabs = PAGES[page].filter((v) => v !== 'explore' || cloudEnabled)
+  const tabs = PAGES[page] // Explore works without the cloud too: the Sổ Đàn library is static.
   if (tabs.length < 2) return null
   return (
     <nav className="subtabs" aria-label={t('page.' + page)}>

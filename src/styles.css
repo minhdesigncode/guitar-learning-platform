@@ -165,6 +165,15 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none}
 .pub-box .pub-ask,.pub-box>.note{flex-basis:100%}
 .pub-box .pub-ask p{margin:0;flex:1 1 200px}
 .pub-box .ghost{background:var(--card)}.pub-box .ghost:hover{background:var(--line)}
+
+/* Explore: Sổ Đàn library */
+.lib-h{margin:20px 0 10px;font-size:17px}
+.arts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+button.art{min-height:36px;padding:6px 14px;font-size:13.5px;background:var(--soft);color:var(--ink)}
+button.art:hover{background:var(--line)}
+button.art.on{background:var(--vbtn);color:#fff}
+.tag.chk{background:color-mix(in srgb,var(--lilac) 35%,transparent);color:var(--violet2)}
+@media (min-width:900px){.lib-list{max-height:62vh;overflow:auto;padding-right:4px}}
 /* segmented switch between the sections of one page (Chords: mine / explore, Self practice: theory / beats) */
 .subtabs{display:flex;gap:2px;background:var(--card);border-radius:999px;padding:4px;margin:0 0 18px;width:fit-content;max-width:100%;box-shadow:0 1px 0 var(--line)}
 .subtabs a{display:flex;align-items:center;min-height:40px;padding:8px 18px;border-radius:999px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:600;white-space:nowrap}

@@ -5,7 +5,7 @@ import { useAuth } from '../cloud/auth.jsx'
 import { searchPublic, getPublic } from '../cloud/publish.js'
 import { useI18n } from '../i18n/index.jsx'
 import { Sheet } from './ChordSpace.jsx'
-import { ARTISTS, LIBRARY, getLibrarySong, searchLibrary } from '../lib/library/songs.js'
+import { ARTISTS, LIBRARY, LIBRARY_VISIBLE, getLibrarySong, searchLibrary } from '../lib/library/songs.js'
 
 const LIB = 'lib-'
 
@@ -101,6 +101,8 @@ export default function Explore({ openId, songs, onSaveCopy }) {
             ))}
           </ul>
         )}
+        {LIBRARY_VISIBLE && (
+          <>
         <h3 className="lib-h">{t('ex.lib', { n: LIBRARY.length })}</h3>
         <div className="arts" role="group" aria-label={t('ex.artist')}>
           <button className={'art' + (!artist ? ' on' : '')} aria-pressed={!artist} onClick={() => setArtist('')}>{t('ex.all')}</button>
@@ -121,6 +123,9 @@ export default function Explore({ openId, songs, onSaveCopy }) {
             </li>
           ))}
         </ul>
+          </>
+        )}
+        {!LIBRARY_VISIBLE && q && list && !list.length && <p className="note">{t('ex.noMatch', { q })}</p>}
       </div>
       <div>
         {!openId ? (

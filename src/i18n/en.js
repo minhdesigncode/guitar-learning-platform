@@ -292,7 +292,7 @@ export default {
   'pub.deleteAlso': 'The public copy will be removed too.',
   'pub.deleteSignedOut': 'This song is public: sign in before deleting to remove the public copy as well.',
   'ex.title': 'Public songs',
-  'ex.search': 'Search by song, artist or author…',
+  'ex.search': 'Search by song or author…',
   'ex.loading': 'Loading…',
   'ex.error': 'Could not load songs. Try again later.',
   'ex.empty': 'Nothing published yet. Open a song in Chords and click “Publish”.',
@@ -316,5 +316,5 @@ export default {
   'ex.checkNote': 'Chords only, no lyrics. These are the chords people usually play; parts may differ from the recording, so check by ear.',
   'ex.draftNote': 'Chords only, no lyrics. A sketch: guessed chords, not transcribed from the recording, so expect to fix them. Save it to your songs and correct by ear.',
   'ex.listen': 'Listen on YouTube',
-  'ex.off': 'Songs people publish need the cloud (Supabase). The library below still works.',
+  'ex.off': 'Explore needs the cloud (Supabase) turned on.',
 }

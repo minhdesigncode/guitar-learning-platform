@@ -7,6 +7,8 @@ import Theory from './components/Theory.jsx'
 import Tools from './components/Tools.jsx'
 import CreativeSpace from './components/CreativeSpace.jsx'
 import Explore from './components/Explore.jsx'
+import { cloudEnabled } from './cloud/client.js'
+import { LIBRARY_VISIBLE } from './lib/library/songs.js'
 import Home from './components/Home.jsx'
 import { useStored, uid, saveMedia } from './lib/store.js'
 import { SEED_SONGS, dropRetiredSeeds } from './lib/seed.js'
@@ -25,7 +27,7 @@ export const pageOf = (view) => Object.keys(PAGES).find((p) => PAGES[p].includes
 
 function SubTabs({ page, view }) {
   const t = useT()
-  const tabs = PAGES[page] // Explore works without the cloud too: the Sổ Đàn library is static.
+  const tabs = PAGES[page].filter((v) => v !== 'explore' || cloudEnabled || LIBRARY_VISIBLE)
   if (tabs.length < 2) return null
   return (
     <nav className="subtabs" aria-label={t('page.' + page)}>

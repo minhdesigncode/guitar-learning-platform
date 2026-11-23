@@ -58,7 +58,7 @@ main{view-transition-name:page}
 
 /* beat grid: real buttons, marked by letter as well as colour */
 .steps button{all:unset;box-sizing:border-box;height:32px;border-radius:10px;background:var(--soft);cursor:pointer;display:grid;place-items:center;
-  font:700 11px Poppins,sans-serif;color:var(--deep);transition:background-color .15s,transform .08s var(--ease-out)}
+  font:700 11px var(--font);color:var(--deep);transition:background-color .15s,transform .08s var(--ease-out)}
 .steps button.k{background:var(--violet);color:#fff}.steps button.s{background:var(--lilac)}.steps button.h{background:var(--lime)}
 .steps button:hover:not(.k,.s,.h){background:var(--line)}
 .steps button:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
